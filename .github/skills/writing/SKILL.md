@@ -1,6 +1,6 @@
 ---
 name: writing
-description: Describe what this skill does and when to use it. Include keywords that help agents identify relevant tasks.
+description: 根據檔案內容撰寫說明文件
 ---
 
 # 目的
