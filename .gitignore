@@ -31,3 +31,45 @@ build/
 
 ### VS Code ###
 .vscode/
+# =========================
+# Backend (Java / Spring Boot)
+# =========================
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+replay_pid*
+
+# 敏感設定檔
+application.properties
+
+# =========================
+# IDE & Editors
+# =========================
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# =========================
+# OS Files
+# =========================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
