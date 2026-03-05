@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import tw.rating.ratingproject.entity.Booking;
 import tw.rating.ratingproject.entity.Review;
 import tw.rating.ratingproject.service.ReviewService;
 import java.util.List;
@@ -30,21 +29,21 @@ public class ReviewController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/student/{studentId}")
-    public List<Review> getByStudentId(@PathVariable Integer studentId) {
-        return reviewService.findByStudentId(studentId);
+    @GetMapping("/user/{userId}")
+    public List<Review> getByUserId(@PathVariable Integer userId) {
+        return reviewService.findByUserId(userId);
     }
 
-    @GetMapping("/tutor-course/{tutorCourseId}")
-    public List<Review> getByTutorCourseId(@PathVariable Integer tutorCourseId) {
-        return reviewService.findByTutorCourseId(tutorCourseId);
+    @GetMapping("/course/{courseId}")
+    public List<Review> getByCourseId(@PathVariable Integer courseId) {
+        return reviewService.findByCourseId(courseId);
     }
 
-    @GetMapping("/tutor-course/{tutorCourseId}/average-rating")
-    public ResponseEntity<Map<String, Object>> getAverageRating(@PathVariable Integer tutorCourseId) {
-        Double avg = reviewService.getAverageRating(tutorCourseId);
+    @GetMapping("/course/{courseId}/average-rating")
+    public ResponseEntity<Map<String, Object>> getAverageRating(@PathVariable Integer courseId) {
+        Double avg = reviewService.getAverageRating(courseId);
         return ResponseEntity.ok(Map.of(
-                "tutorCourseId", tutorCourseId,
+                "courseId", courseId,
                 "averageRating", avg != null ? avg : 0.0
         ));
     }
@@ -62,9 +61,7 @@ public class ReviewController {
             }
 
             Review review = new Review();
-            Booking booking = new Booking();
-            booking.setId(request.getBookingId());
-            review.setBooking(booking);
+            review.setBookingId(request.getBookingId());
             review.setRating(request.getRating());
             review.setComment(request.getContent());
 
@@ -80,6 +77,19 @@ public class ReviewController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ErrorResponse("伺服器錯誤: " + e.getMessage()));
         }
+    }
+
+    public static class ReviewRequest {
+        private Long bookingId;
+        private Integer rating;
+        private String content;
+
+        public Long getBookingId() { return bookingId; }
+        public void setBookingId(Long bookingId) { this.bookingId = bookingId; }
+        public Integer getRating() { return rating; }
+        public void setRating(Integer rating) { this.rating = rating; }
+        public String getContent() { return content; }
+        public void setContent(String content) { this.content = content; }
     }
 
     @PutMapping("/{id}")

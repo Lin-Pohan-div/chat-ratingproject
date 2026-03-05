@@ -35,12 +35,12 @@ public class ChatMessageService {
         return chatMessageRepository.save(chatMessage);
     }
 
-    public ChatMessage saveMessage(Integer bookingId, Integer senderId, String content) {
+    public ChatMessage saveMessage(Long bookingId, Integer senderId, String content) {
         // 驗證 booking 存在
         if (bookingId == null || bookingId <= 0) {
             throw new IllegalArgumentException("Booking ID 不能為空");
         }
-        
+
         Booking booking = bookingRepository.findById(bookingId)
             .orElseThrow(() -> new NoSuchElementException(
                 "Booking ID: " + bookingId + " 不存在"

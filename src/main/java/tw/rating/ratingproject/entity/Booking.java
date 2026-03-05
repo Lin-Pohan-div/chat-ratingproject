@@ -11,31 +11,34 @@ public class Booking {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
-    @Column(name = "student_id", nullable = false)
-    private Integer studentId;
+    @Column(name = "order_id", nullable = false)
+    private Long orderId;
 
-    @Column(name = "tutor_id", nullable = false)
-    private Integer tutorId;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
+
+    @Column(name = "course_id", nullable = false)
+    private Long courseId;
+
+    @Column(name = "lesson_count", nullable = false)
+    private Integer lessonCount;
+
+    @Column(name = "unit_price", nullable = false)
+    private Integer unitPrice;
+
+    @Column(name = "discount_price")
+    private Integer discountPrice;
 
     @Column(nullable = false)
-    private String status;
+    private Integer status; // 1 pending / 2 deal / 3 complete
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
     }
 }

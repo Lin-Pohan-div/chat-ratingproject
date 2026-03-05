@@ -43,9 +43,12 @@ class ReviewControlTest {
         bookingRepository.deleteAll();
         
         testBooking = new Booking();
-        testBooking.setStudentId(1);
-        testBooking.setTutorId(101);
-        testBooking.setStatus("confirmed");
+        testBooking.setOrderId(1L);
+        testBooking.setUserId(1L);
+        testBooking.setCourseId(101L);
+        testBooking.setLessonCount(1);
+        testBooking.setUnitPrice(100);
+        testBooking.setStatus(2);
         testBooking = bookingRepository.save(testBooking);
     }
 
@@ -63,7 +66,7 @@ class ReviewControlTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.rating").value(5))
                 .andExpect(jsonPath("$.content").value("Great tutoring session"))
-                .andExpect(jsonPath("$.booking.id").value(testBooking.getId()));
+            .andExpect(jsonPath("$.bookingId").value(testBooking.getId()));
     }
 
     @Test
@@ -80,7 +83,7 @@ class ReviewControlTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.rating").value(4))
                 .andExpect(jsonPath("$.content").value("Good experience"))
-                .andExpect(jsonPath("$.booking").exists())
-                .andExpect(jsonPath("$.booking.id").isNumber());
+            .andExpect(jsonPath("$.bookingId").exists())
+            .andExpect(jsonPath("$.bookingId").isNumber());
     }
 }

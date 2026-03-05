@@ -39,9 +39,12 @@ class ChatMessageServiceTestsTest {
     @BeforeEach
     void setUp() {
         testBooking = new Booking();
-        testBooking.setStudentId(1);
-        testBooking.setTutorId(101);
-        testBooking.setStatus("confirmed");
+        testBooking.setOrderId(1L);
+        testBooking.setUserId(1L);
+        testBooking.setCourseId(101L);
+        testBooking.setLessonCount(1);
+        testBooking.setUnitPrice(100);
+        testBooking.setStatus(2);
         testBooking = bookingRepository.save(testBooking);
     }
 
@@ -73,7 +76,7 @@ class ChatMessageServiceTestsTest {
         msg2.setContent("Message 2");
         chatMessageService.save(msg2);
 
-        List<ChatMessage> messages = chatMessageService.findByBookingId(testBooking.getId());
+        List<ChatMessage> messages = chatMessageService.findByBookingId(testBooking.getId().intValue());
 
         assertThat(messages).hasSize(2);
         assertThat(messages).extracting("content").contains("Message 1", "Message 2");
@@ -81,7 +84,7 @@ class ChatMessageServiceTestsTest {
 
     @Test
     void testFindByBookingId_withNoMessages_shouldReturnEmptyList() {
-        List<ChatMessage> messages = chatMessageService.findByBookingId(testBooking.getId());
+        List<ChatMessage> messages = chatMessageService.findByBookingId(testBooking.getId().intValue());
 
         assertThat(messages).isEmpty();
     }
@@ -155,7 +158,7 @@ class ChatMessageServiceTestsTest {
         msg2.setContent("Second");
         chatMessageService.save(msg2);
 
-        List<ChatMessage> messages = chatMessageService.findByBookingId(testBooking.getId());
+        List<ChatMessage> messages = chatMessageService.findByBookingId(testBooking.getId().intValue());
 
         assertThat(messages).hasSize(2);
         assertThat(messages.get(0).getContent()).isEqualTo("First");
@@ -177,7 +180,7 @@ class ChatMessageServiceTestsTest {
         chatMessageService.save(msgFromStudent);
         chatMessageService.save(msgFromTutor);
 
-        List<ChatMessage> messages = chatMessageService.findByBookingId(testBooking.getId());
+        List<ChatMessage> messages = chatMessageService.findByBookingId(testBooking.getId().intValue());
 
         assertThat(messages).hasSize(2);
         assertThat(messages).extracting("senderId").contains(1, 101);
@@ -186,9 +189,12 @@ class ChatMessageServiceTestsTest {
     @Test
     void testFindByBookingId_withMultipleBookings_shouldReturnOnlyRelevantMessages() {
         Booking anotherBooking = new Booking();
-        anotherBooking.setStudentId(2);
-        anotherBooking.setTutorId(102);
-        anotherBooking.setStatus("confirmed");
+        anotherBooking.setOrderId(2L);
+        anotherBooking.setUserId(2L);
+        anotherBooking.setCourseId(102L);
+        anotherBooking.setLessonCount(1);
+        anotherBooking.setUnitPrice(100);
+        anotherBooking.setStatus(2);
         anotherBooking = bookingRepository.save(anotherBooking);
 
         ChatMessage msg1 = new ChatMessage();
@@ -203,7 +209,7 @@ class ChatMessageServiceTestsTest {
         msg2.setContent("Booking 2 message");
         chatMessageService.save(msg2);
 
-        List<ChatMessage> messages = chatMessageService.findByBookingId(testBooking.getId());
+        List<ChatMessage> messages = chatMessageService.findByBookingId(testBooking.getId().intValue());
 
         assertThat(messages).hasSize(1);
         assertThat(messages.get(0).getContent()).isEqualTo("Booking 1 message");
@@ -224,6 +230,6 @@ class ChatMessageServiceTestsTest {
         ChatMessage reloaded = chatMessageRepository.findById(saved.getId()).orElseThrow();
 
         assertThat(reloaded.getBookingId()).isNotNull();
-        assertThat(reloaded.getBookingId()).isEqualTo(testBooking.getId());
+        assertThat(reloaded.getBookingId()).isEqualTo(testBooking.getId().intValue());
     }
 }

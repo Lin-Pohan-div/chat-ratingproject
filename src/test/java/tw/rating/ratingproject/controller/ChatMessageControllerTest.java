@@ -44,9 +44,12 @@ class ChatMessageControllerTest {
         bookingRepository.deleteAll();
         
         testBooking = new Booking();
-        testBooking.setStudentId(1);
-        testBooking.setTutorId(101);
-        testBooking.setStatus("confirmed");
+        testBooking.setOrderId(1L);
+        testBooking.setUserId(1L);
+        testBooking.setCourseId(101L);
+        testBooking.setLessonCount(1);
+        testBooking.setUnitPrice(100);
+        testBooking.setStatus(2);
         testBooking = bookingRepository.save(testBooking);
     }
 

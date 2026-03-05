@@ -30,16 +30,19 @@ class ReviewServiceTest {
     @BeforeEach
     void setUp() {
         testBooking = new Booking();
-        testBooking.setStudentId(1);
-        testBooking.setTutorId(101);
-        testBooking.setStatus("confirmed");
+        testBooking.setOrderId(1L);
+        testBooking.setUserId(1L);
+        testBooking.setCourseId(101L);
+        testBooking.setLessonCount(1);
+        testBooking.setUnitPrice(100);
+        testBooking.setStatus(2);
         testBooking = bookingRepository.save(testBooking);
     }
 
     @Test
     void testSaveReview_withValidData_shouldPersist() {
         Review review = new Review();
-        review.setBooking(testBooking);
+        review.setBookingId(testBooking.getId());
         review.setRating(5);
         review.setComment("Excellent tutor");
 
@@ -53,7 +56,7 @@ class ReviewServiceTest {
     @Test
     void testFindByBookingId_withReview_shouldReturnReview() {
         Review review = new Review();
-        review.setBooking(testBooking);
+        review.setBookingId(testBooking.getId());
         review.setRating(4);
         review.setComment("Good session");
         reviewService.save(review);
@@ -74,7 +77,7 @@ class ReviewServiceTest {
     @Test
     void testSaveReview_withNullRating_shouldFail() {
         Review review = new Review();
-        review.setBooking(testBooking);
+        review.setBookingId(testBooking.getId());
         review.setRating(null);
 
         assertThatThrownBy(() -> reviewService.save(review)).isNotNull();
