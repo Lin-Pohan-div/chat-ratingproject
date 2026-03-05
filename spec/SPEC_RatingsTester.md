@@ -151,22 +151,27 @@ null
   - Payload (Request Body)（來自 `<textarea id="review-body">`，預設值）：
 ```json
 {
-  "studentId": 1,
-  "tutorCourseId": 1,
+  "bookingId": 1,
   "rating": 5,
-  "comment": "Great!"
+  "content": "Great!"
 }
 ```
+  - **必填欄位**：`bookingId`（Booking ID，用於關聯學生與課程）、`rating`（1~5 星評分）
+  - **可選欄位**：`content`（評論內容，對應回應中的 `comment` 欄位）
 
 * **回應內容 (Response)**
-  - HTTP Status: `200 OK`
+  - HTTP Status: `201 Created`
   - Body:
 ```json
-{"comment":"Great!","createdAt":"2026-03-05T11:47:31.5399767","id":7,"rating":5,"studentId":1,"tutorCourseId":1,"updatedAt":"2026-03-05T11:47:31.5399767"}
+{"bookingId":1,"comment":"Great!","createdAt":"2026-03-05T11:47:31.539977","id":7,"rating":5,"studentId":1,"tutorCourseId":1,"updatedAt":"2026-03-05T11:47:31.539977"}
 ```
-  - 資料解讀與處理邏輯：rawtext 顯示；回應含後端自動產生的 `id`、`createdAt`、`updatedAt`。
+  - 資料解讀與處理邏輯：rawtext 顯示；回應含後端自動產生的 `id`、`bookingId`、`studentId`、`tutorCourseId`、`createdAt`、`updatedAt`。
   - 顯示邏輯：`createReview()` → `runRequest()` → `setOutput(text)` → `<pre id="output-reviews">`。
-  - 其他重要細節：`review-body` textarea 內容由使用者直接編輯後送出，前端不做欄位驗證，非法 JSON 會導致後端 `400`。
+  - 其他重要細節：
+    - `review-body` textarea 內容由使用者直接編輯後送出，前端不做欄位驗證
+    - 若 `bookingId` 為 null/空，後端回 `400 - 驗證失敗: bookingId 不能為空`
+    - 若 `rating` 為 null/空，後端回 `400 - 驗證失敗: rating 不能為空`
+    - 非法 JSON 會導致後端 `400`
   - **注意**：以上內容來自實際 API 呼叫與程式碼分析。
 
 ---
