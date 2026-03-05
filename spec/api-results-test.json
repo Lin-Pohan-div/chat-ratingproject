@@ -1,0 +1,112 @@
+﻿[
+    {
+        "name":  "GET courses",
+        "method":  "GET",
+        "url":  "http://localhost:8080/api/courses",
+        "requestBody":  null,
+        "statusCode":  200,
+        "statusDescription":  "",
+        "responseBody":  "[{\"bookingId\":101,\"courseDate\":\"2026-03-05\",\"createdAt\":\"2026-03-05T09:55:57.221179\",\"hour\":2,\"id\":1,\"status\":1,\"updatedAt\":\"2026-03-05T09:55:57.287956\"}]"
+    },
+    {
+        "name":  "POST courses",
+        "method":  "POST",
+        "url":  "http://localhost:8080/api/courses",
+        "requestBody":  "{\"bookingId\":101,\"courseDate\":\"2026-03-05\",\"hour\":2,\"status\":0}",
+        "statusCode":  200,
+        "statusDescription":  "",
+        "responseBody":  "{\"bookingId\":101,\"courseDate\":\"2026-03-05\",\"createdAt\":\"2026-03-05T09:56:26.2566816\",\"hour\":2,\"id\":2,\"status\":0,\"updatedAt\":\"2026-03-05T09:56:26.2566816\"}"
+    },
+    {
+        "name":  "GET courses by id",
+        "method":  "GET",
+        "url":  "http://localhost:8080/api/courses/1",
+        "requestBody":  null,
+        "statusCode":  200,
+        "statusDescription":  "",
+        "responseBody":  "{\"bookingId\":101,\"courseDate\":\"2026-03-05\",\"createdAt\":\"2026-03-05T09:55:57.221179\",\"hour\":2,\"id\":1,\"status\":1,\"updatedAt\":\"2026-03-05T09:55:57.287956\"}"
+    },
+    {
+        "name":  "PATCH courses status",
+        "method":  "PATCH",
+        "url":  "http://localhost:8080/api/courses/1/status",
+        "requestBody":  "{\"status\":1}",
+        "statusCode":  200,
+        "statusDescription":  "",
+        "responseBody":  "{\"bookingId\":101,\"courseDate\":\"2026-03-05\",\"createdAt\":\"2026-03-05T09:55:57.221179\",\"hour\":2,\"id\":1,\"status\":1,\"updatedAt\":\"2026-03-05T09:55:57.287956\"}"
+    },
+    {
+        "name":  "GET reviews",
+        "method":  "GET",
+        "url":  "http://localhost:8080/api/reviews",
+        "requestBody":  null,
+        "statusCode":  200,
+        "statusDescription":  "",
+        "responseBody":  "[{\"comment\":\"updated by spec\",\"createdAt\":\"2026-03-05T09:42:38.882853\",\"id\":1,\"rating\":4,\"studentId\":1,\"tutorCourseId\":1,\"updatedAt\":\"2026-03-05T09:55:57.482477\"},{\"comment\":\"Very good\",\"createdAt\":\"2026-03-05T09:42:38.882853\",\"id\":2,\"rating\":4,\"studentId\":2,\"tutorCourseId\":1,\"updatedAt\":\"2026-03-05T09:42:38.882853\"},{\"comment\":\"Average experience\",\"createdAt\":\"2026-03-05T09:42:38.882853\",\"id\":3,\"rating\":3,\"studentId\":3,\"tutorCourseId\":2,\"updatedAt\":\"2026-03-05T09:42:38.882853\"},{\"comment\":\"Could improve\",\"createdAt\":\"2026-03-05T09:42:38.882853\",\"id\":4,\"rating\":2,\"studentId\":1,\"tutorCourseId\":2,\"updatedAt\":\"2026-03-05T09:42:38.882853\"},{\"comment\":\"Outstanding\",\"createdAt\":\"2026-03-05T09:42:38.882853\",\"id\":5,\"rating\":5,\"studentId\":4,\"tutorCourseId\":3,\"updatedAt\":\"2026-03-05T09:42:38.882853\"},{\"comment\":\"spec test\",\"createdAt\":\"2026-03-05T09:55:57.454571\",\"id\":7,\"rating\":5,\"studentId\":9,\"tutorCourseId\":1,\"updatedAt\":\"2026-03-05T09:55:57.454571\"}]"
+    },
+    {
+        "name":  "GET review by id",
+        "method":  "GET",
+        "url":  "http://localhost:8080/api/reviews/1",
+        "requestBody":  null,
+        "statusCode":  200,
+        "statusDescription":  "",
+        "responseBody":  "{\"comment\":\"updated by spec\",\"createdAt\":\"2026-03-05T09:42:38.882853\",\"id\":1,\"rating\":4,\"studentId\":1,\"tutorCourseId\":1,\"updatedAt\":\"2026-03-05T09:55:57.482477\"}"
+    },
+    {
+        "name":  "GET reviews by student",
+        "method":  "GET",
+        "url":  "http://localhost:8080/api/reviews/student/1",
+        "requestBody":  null,
+        "statusCode":  200,
+        "statusDescription":  "",
+        "responseBody":  "[{\"comment\":\"updated by spec\",\"createdAt\":\"2026-03-05T09:42:38.882853\",\"id\":1,\"rating\":4,\"studentId\":1,\"tutorCourseId\":1,\"updatedAt\":\"2026-03-05T09:55:57.482477\"},{\"comment\":\"Could improve\",\"createdAt\":\"2026-03-05T09:42:38.882853\",\"id\":4,\"rating\":2,\"studentId\":1,\"tutorCourseId\":2,\"updatedAt\":\"2026-03-05T09:42:38.882853\"}]"
+    },
+    {
+        "name":  "GET reviews by tutor-course",
+        "method":  "GET",
+        "url":  "http://localhost:8080/api/reviews/tutor-course/1",
+        "requestBody":  null,
+        "statusCode":  200,
+        "statusDescription":  "",
+        "responseBody":  "[{\"comment\":\"updated by spec\",\"createdAt\":\"2026-03-05T09:42:38.882853\",\"id\":1,\"rating\":4,\"studentId\":1,\"tutorCourseId\":1,\"updatedAt\":\"2026-03-05T09:55:57.482477\"},{\"comment\":\"Very good\",\"createdAt\":\"2026-03-05T09:42:38.882853\",\"id\":2,\"rating\":4,\"studentId\":2,\"tutorCourseId\":1,\"updatedAt\":\"2026-03-05T09:42:38.882853\"},{\"comment\":\"spec test\",\"createdAt\":\"2026-03-05T09:55:57.454571\",\"id\":7,\"rating\":5,\"studentId\":9,\"tutorCourseId\":1,\"updatedAt\":\"2026-03-05T09:55:57.454571\"}]"
+    },
+    {
+        "name":  "GET average rating",
+        "method":  "GET",
+        "url":  "http://localhost:8080/api/reviews/tutor-course/1/average-rating",
+        "requestBody":  null,
+        "statusCode":  200,
+        "statusDescription":  "",
+        "responseBody":  "{\"averageRating\":4.333333333333333,\"tutorCourseId\":1}"
+    },
+    {
+        "name":  "POST reviews",
+        "method":  "POST",
+        "url":  "http://localhost:8080/api/reviews",
+        "requestBody":  "{\"studentId\":9,\"tutorCourseId\":1,\"rating\":5,\"comment\":\"spec test\"}",
+        "statusCode":  200,
+        "statusDescription":  "",
+        "responseBody":  "{\"comment\":\"spec test\",\"createdAt\":\"2026-03-05T09:56:26.4550181\",\"id\":8,\"rating\":5,\"studentId\":9,\"tutorCourseId\":1,\"updatedAt\":\"2026-03-05T09:56:26.4550181\"}"
+    },
+    {
+        "name":  "PUT reviews",
+        "method":  "PUT",
+        "url":  "http://localhost:8080/api/reviews/1",
+        "requestBody":  "{\"rating\":4,\"comment\":\"updated by spec\"}",
+        "statusCode":  200,
+        "statusDescription":  "",
+        "responseBody":  "{\"comment\":\"updated by spec\",\"createdAt\":\"2026-03-05T09:42:38.882853\",\"id\":1,\"rating\":4,\"studentId\":1,\"tutorCourseId\":1,\"updatedAt\":\"2026-03-05T09:55:57.482477\"}"
+    },
+    {
+        "name":  "DELETE reviews",
+        "method":  "DELETE",
+        "url":  "http://localhost:8080/api/reviews/7",
+        "requestBody":  null,
+        "statusCode":  204,
+        "statusDescription":  "",
+        "responseBody":  [
+
+                         ]
+    }
+]

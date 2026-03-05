@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatMessage Controller Tester</title>
+  <style>
+    :root {
+      --bg-1: #f4efe6;
+      --bg-2: #d9ead3;
+      --card: #fffdf8;
+      --text: #1f2a24;
+      --muted: #4f5d55;
+      --accent: #12664f;
+      --accent-2: #ea7317;
+      --danger: #b42318;
+      --border: #c7d7cc;
+      --shadow: 0 12px 32px rgba(24, 48, 36, 0.12);
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "IBM Plex Sans", "Noto Sans TC", "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(80rem 50rem at 20% -10%, rgba(255, 255, 255, 0.65), transparent 65%),
+        radial-gradient(50rem 40rem at 90% 10%, rgba(18, 102, 79, 0.18), transparent 70%),
+        linear-gradient(160deg, var(--bg-1), var(--bg-2));
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .layout {
+      max-width: 1024px;
+      margin: 0 auto;
+      display: grid;
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
+      font-size: clamp(1.5rem, 2vw + 1rem, 2.4rem);
+      letter-spacing: 0.02em;
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 1.2rem;
+    }
+
+    p {
+      margin: 8px 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+
+    .field {
+      grid-column: span 12;
+      display: grid;
+      gap: 6px;
+    }
+
+    .col-6 {
+      grid-column: span 6;
+    }
+
+    label {
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+      font-family: "IBM Plex Mono", Consolas, monospace;
+      background: #fff;
+      color: var(--text);
+    }
+
+    textarea {
+      min-height: 96px;
+      resize: vertical;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 10px 16px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform 120ms ease, opacity 120ms ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-secondary {
+      background: #ecf4f1;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-warn {
+      background: var(--accent-2);
+      color: #fff;
+    }
+
+    .status {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #eff7f3;
+      color: var(--text);
+      border: 1px solid var(--border);
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+    }
+
+    .status.error {
+      background: #fff2f2;
+      border-color: #f3c7c7;
+      color: var(--danger);
+    }
+
+    .result-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 0.9rem;
+      overflow: hidden;
+      border-radius: 10px;
+    }
+
+    .result-table th,
+    .result-table td {
+      border: 1px solid var(--border);
+      padding: 8px;
+      text-align: left;
+      vertical-align: top;
+      word-break: break-word;
+    }
+
+    .result-table thead {
+      background: #edf5f2;
+    }
+
+    pre {
+      margin: 10px 0 0;
+      background: #10251d;
+      color: #ddf5e9;
+      border-radius: 12px;
+      padding: 12px;
+      overflow-x: auto;
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding: 14px;
+      }
+
+      .col-6 {
+        grid-column: span 12;
+      }
+
+      .card {
+        padding: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="layout">
+    <section class="card">
+      <h1>ChatMessage Controller 驗證頁</h1>
+      <p>測試端點：<code>GET /api/chat-messages/booking/{bookingId}</code>、<code>POST /api/chat-messages</code></p>
+      <p class="muted">若你從 Spring Boot 專案直接開啟此頁，會預設使用同網域的 <code>/api</code>；也可手動改成其他主機位址。</p>
+      <div class="grid">
+        <div class="field">
+          <label for="baseUrl">API Base URL</label>
+          <input id="baseUrl" type="text" value="/api">
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>新增訊息 (POST)</h2>
+      <div class="grid">
+        <div class="field col-6">
+          <label for="bookingId">bookingId</label>
+          <input id="bookingId" type="number" min="1" value="1">
+        </div>
+        <div class="field col-6">
+          <label for="senderId">senderId</label>
+          <input id="senderId" type="number" min="1" value="1">
+        </div>
+        <div class="field">
+          <label for="content">content</label>
+          <textarea id="content">Hello, this message is from the tester page.</textarea>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn-primary" id="createBtn" type="button">送出 POST</button>
+        <button class="btn-secondary" id="fillSampleBtn" type="button">填入範例內容</button>
+      </div>
+      <div id="postStatus" class="status">尚未送出請求</div>
+      <pre id="postResult">{}</pre>
+    </section>
+
+    <section class="card">
+      <h2>依 bookingId 查詢訊息 (GET)</h2>
+      <div class="grid">
+        <div class="field col-6">
+          <label for="queryBookingId">bookingId</label>
+          <input id="queryBookingId" type="number" min="1" value="1">
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn-primary" id="queryBtn" type="button">送出 GET</button>
+        <button class="btn-warn" id="clearBtn" type="button">清除結果</button>
+      </div>
+      <div id="getStatus" class="status">尚未查詢</div>
+      <div id="tableWrap"></div>
+      <pre id="getResult">[]</pre>
+    </section>
+  </main>
+
+  <script>
+    const ids = {
+      baseUrl: document.getElementById("baseUrl"),
+      bookingId: document.getElementById("bookingId"),
+      senderId: document.getElementById("senderId"),
+      content: document.getElementById("content"),
+      queryBookingId: document.getElementById("queryBookingId"),
+      postStatus: document.getElementById("postStatus"),
+      getStatus: document.getElementById("getStatus"),
+      postResult: document.getElementById("postResult"),
+      getResult: document.getElementById("getResult"),
+      tableWrap: document.getElementById("tableWrap")
+    };
+
+    function normalizeBaseUrl(value) {
+      const trimmed = value.trim();
+      if (!trimmed) return "/api";
+      return trimmed.endsWith("/") ? trimmed.slice(0, -1) : trimmed;
+    }
+
+    function setStatus(target, text, isError) {
+      target.textContent = text;
+      target.classList.toggle("error", !!isError);
+    }
+
+    function pretty(value) {
+      return JSON.stringify(value, null, 2);
+    }
+
+    function createMessageEndpoint() {
+      return normalizeBaseUrl(ids.baseUrl.value) + "/chat-messages";
+    }
+
+    function renderTable(list) {
+      if (!Array.isArray(list) || list.length === 0) {
+        ids.tableWrap.innerHTML = "";
+        return;
+      }
+
+      const header = "<thead><tr><th>id</th><th>bookingId</th><th>senderId</th><th>content</th><th>createdAt</th></tr></thead>";
+      const rows = list
+        .map(function (m) {
+          return "<tr>" +
+            "<td>" + escapeHtml(String(m.id ?? "")) + "</td>" +
+            "<td>" + escapeHtml(String(m.bookingId ?? "")) + "</td>" +
+            "<td>" + escapeHtml(String(m.senderId ?? "")) + "</td>" +
+            "<td>" + escapeHtml(String(m.content ?? "")) + "</td>" +
+            "<td>" + escapeHtml(String(m.createdAt ?? "")) + "</td>" +
+            "</tr>";
+        })
+        .join("");
+
+      ids.tableWrap.innerHTML = "<table class=\"result-table\">" + header + "<tbody>" + rows + "</tbody></table>";
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    async function postMessage() {
+      const bookingId = Number(ids.bookingId.value);
+      const senderId = Number(ids.senderId.value);
+      const content = ids.content.value.trim();
+
+      if (!Number.isInteger(bookingId) || bookingId <= 0 || !Number.isInteger(senderId) || senderId <= 0 || !content) {
+        setStatus(ids.postStatus, "欄位驗證失敗：bookingId/senderId 需為正整數，content 不可為空。", true);
+        return;
+      }
+
+      const payload = { bookingId: bookingId, senderId: senderId, content: content };
+      const url = createMessageEndpoint();
+
+      try {
+        setStatus(ids.postStatus, "送出中...", false);
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const text = await response.text();
+        const data = text ? JSON.parse(text) : {};
+        ids.postResult.textContent = pretty(data);
+
+        if (!response.ok) {
+          setStatus(ids.postStatus, "POST 失敗，HTTP " + response.status, true);
+          return;
+        }
+
+        setStatus(ids.postStatus, "POST 成功，HTTP " + response.status, false);
+      } catch (err) {
+        setStatus(ids.postStatus, "POST 例外：" + (err && err.message ? err.message : String(err)), true);
+      }
+    }
+
+    async function queryMessages() {
+      const bookingId = Number(ids.queryBookingId.value);
+      if (!Number.isInteger(bookingId) || bookingId <= 0) {
+        setStatus(ids.getStatus, "欄位驗證失敗：bookingId 需為正整數。", true);
+        return;
+      }
+
+      const url = createMessageEndpoint() + "/booking/" + bookingId;
+
+      try {
+        setStatus(ids.getStatus, "查詢中...", false);
+        const response = await fetch(url, { method: "GET" });
+        const text = await response.text();
+        const data = text ? JSON.parse(text) : [];
+        ids.getResult.textContent = pretty(data);
+        renderTable(data);
+
+        if (!response.ok) {
+          setStatus(ids.getStatus, "GET 失敗，HTTP " + response.status, true);
+          return;
+        }
+
+        const count = Array.isArray(data) ? data.length : 0;
+        setStatus(ids.getStatus, "GET 成功，HTTP " + response.status + "，共 " + count + " 筆", false);
+      } catch (err) {
+        setStatus(ids.getStatus, "GET 例外：" + (err && err.message ? err.message : String(err)), true);
+      }
+    }
+
+    function fillSample() {
+      ids.bookingId.value = "1";
+      ids.senderId.value = String(Math.floor(Math.random() * 100) + 1);
+      ids.content.value = "Test message at " + new Date().toISOString();
+      setStatus(ids.postStatus, "已填入範例資料，可直接送出 POST。", false);
+    }
+
+    function clearGetResult() {
+      ids.getResult.textContent = "[]";
+      ids.tableWrap.innerHTML = "";
+      setStatus(ids.getStatus, "結果已清除", false);
+    }
+
+    document.getElementById("createBtn").addEventListener("click", postMessage);
+    document.getElementById("queryBtn").addEventListener("click", queryMessages);
+    document.getElementById("fillSampleBtn").addEventListener("click", fillSample);
+    document.getElementById("clearBtn").addEventListener("click", clearGetResult);
+  </script>
+</body>
+</html>

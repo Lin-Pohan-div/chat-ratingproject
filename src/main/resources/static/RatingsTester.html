@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reviews / Ratings Controller Tester</title>
+    <style>
+        :root {
+            --bg-1: #f4efe6;
+            --bg-2: #d9ead3;
+            --card: #fffdf8;
+            --text: #1f2a24;
+            --muted: #4f5d55;
+            --accent: #12664f;
+            --accent-2: #ea7317;
+            --danger: #b42318;
+            --border: #c7d7cc;
+            --shadow: 0 12px 32px rgba(24, 48, 36, 0.12);
+            --radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "IBM Plex Sans", "Noto Sans TC", "Segoe UI", sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(80rem 50rem at 20% -10%, rgba(255, 255, 255, 0.65), transparent 65%),
+                radial-gradient(50rem 40rem at 90% 10%, rgba(18, 102, 79, 0.18), transparent 70%),
+                linear-gradient(160deg, var(--bg-1), var(--bg-2));
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .layout {
+            max-width: 1024px;
+            margin: 0 auto;
+            display: grid;
+            gap: 16px;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+        }
+
+        h1 {
+            margin: 0;
+            font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
+            font-size: clamp(1.5rem, 2vw + 1rem, 2.4rem);
+            letter-spacing: 0.02em;
+        }
+
+        h2 {
+            margin: 0 0 12px;
+            font-size: 1.2rem;
+        }
+
+        p {
+            margin: 8px 0;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .muted {
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        .grid {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(12, minmax(0, 1fr));
+        }
+
+        .field {
+            grid-column: span 12;
+            display: grid;
+            gap: 6px;
+        }
+
+        .col-6 {
+            grid-column: span 6;
+        }
+
+        label {
+            font-size: 0.92rem;
+            color: var(--muted);
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-size: 0.95rem;
+            font-family: "IBM Plex Mono", Consolas, monospace;
+            background: #fff;
+            color: var(--text);
+        }
+
+        textarea {
+            min-height: 104px;
+            resize: vertical;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        button {
+            border: 0;
+            border-radius: 999px;
+            padding: 10px 16px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 120ms ease, opacity 120ms ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background: #ecf4f1;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-warn {
+            background: var(--accent-2);
+            color: #fff;
+        }
+
+        .status {
+            margin-top: 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: #eff7f3;
+            color: var(--text);
+            border: 1px solid var(--border);
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+        }
+
+        .status.error {
+            background: #fff2f2;
+            border-color: #f3c7c7;
+            color: var(--danger);
+        }
+
+        pre {
+            margin: 10px 0 0;
+            background: #10251d;
+            color: #ddf5e9;
+            border-radius: 12px;
+            padding: 12px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 720px) {
+            body {
+                padding: 14px;
+            }
+
+            .col-6 {
+                grid-column: span 12;
+            }
+
+            .card {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="layout">
+        <section class="card">
+            <h1>Reviews / Ratings 驗證頁</h1>
+            <p>此頁僅保留 Review API 驗證，風格與 `chat-message-test.html` 一致。</p>
+            <p class="muted">預設 base URL 為 <code>/api</code>，可改成其他主機位址。</p>
+            <div class="grid">
+                <div class="field">
+                    <label for="baseUrl">API Base URL</label>
+                    <input id="baseUrl" type="text" value="/api" />
+                </div>
+            </div>
+        </section>
+
+        <section class="card" id="reviews">
+            <h2>Reviews / Ratings</h2>
+            <div class="grid">
+                <div class="field col-6">
+                    <label for="review-id">Review ID</label>
+                    <input type="number" id="review-id" min="1" value="1" />
+                </div>
+                <div class="field col-6">
+                    <label for="review-student-id">Student ID</label>
+                    <input type="number" id="review-student-id" min="1" value="1" />
+                </div>
+                <div class="field col-6">
+                    <label for="review-tutorcourse-id">Tutor Course ID</label>
+                    <input type="number" id="review-tutorcourse-id" min="1" value="1" />
+                </div>
+                <div class="field col-6">
+                    <label for="review-delete-id">Delete Review ID</label>
+                    <input type="number" id="review-delete-id" min="1" value="1" />
+                </div>
+                <div class="field">
+                    <label for="review-body">Create Review JSON</label>
+                    <textarea id="review-body">{ "studentId": 1, "tutorCourseId": 1, "rating": 5, "comment": "Great!" }</textarea>
+                </div>
+                <div class="field">
+                    <label for="review-update-body">Update Review JSON</label>
+                    <textarea id="review-update-body">{ "rating": 4, "comment": "Updated comment" }</textarea>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="btn-primary" onclick="fetchAllReviews()">GET /api/reviews</button>
+                <button class="btn-primary" onclick="fetchReviewById()">GET by ID</button>
+                <button class="btn-secondary" onclick="fetchByStudent()">GET by Student</button>
+                <button class="btn-secondary" onclick="fetchByTutorCourse()">GET by TutorCourse</button>
+                <button class="btn-secondary" onclick="fetchAverageRating()">GET Avg Rating</button>
+                <button class="btn-primary" onclick="createReview()">POST</button>
+                <button class="btn-warn" onclick="updateReview()">PUT</button>
+                <button class="btn-warn" onclick="deleteReview()">DELETE</button>
+            </div>
+
+            <div id="review-status" class="status">尚未送出請求</div>
+            <pre id="output-reviews">{}</pre>
+        </section>
+    </main>
+
+    <script>
+        function baseUrl() {
+            const value = document.getElementById("baseUrl").value.trim();
+            if (!value) return "/api";
+            return value.endsWith("/") ? value.slice(0, -1) : value;
+        }
+
+        function reviewsUrl(path) {
+            return baseUrl() + "/reviews" + (path ? "/" + path : "");
+        }
+
+        function setStatus(message, isError) {
+            const area = document.getElementById("review-status");
+            area.textContent = message;
+            area.classList.toggle("error", !!isError);
+        }
+
+        function setOutput(text) {
+            document.getElementById("output-reviews").textContent = text;
+        }
+
+        async function runRequest(url, options, successHint) {
+            try {
+                setStatus("請求中...", false);
+                const response = await fetch(url, options || {});
+                const text = await response.text();
+                setOutput(text || "{}");
+
+                if (!response.ok) {
+                    setStatus("HTTP " + response.status + " - 請求失敗", true);
+                    return;
+                }
+
+                setStatus(successHint + " (HTTP " + response.status + ")", false);
+            } catch (error) {
+                setStatus("例外: " + (error && error.message ? error.message : String(error)), true);
+            }
+        }
+
+        function fetchAllReviews() {
+            runRequest(reviewsUrl(""), null, "查詢全部 Reviews 成功");
+        }
+
+        function fetchReviewById() {
+            const id = document.getElementById("review-id").value;
+            runRequest(reviewsUrl(id), null, "查詢 Review by ID 成功");
+        }
+
+        function fetchByStudent() {
+            const studentId = document.getElementById("review-student-id").value;
+            runRequest(reviewsUrl("student/" + studentId), null, "查詢 Student Reviews 成功");
+        }
+
+        function fetchByTutorCourse() {
+            const tutorCourseId = document.getElementById("review-tutorcourse-id").value;
+            runRequest(reviewsUrl("tutor-course/" + tutorCourseId), null, "查詢 TutorCourse Reviews 成功");
+        }
+
+        function fetchAverageRating() {
+            const tutorCourseId = document.getElementById("review-tutorcourse-id").value;
+            runRequest(reviewsUrl("tutor-course/" + tutorCourseId + "/average-rating"), null, "查詢平均評分成功");
+        }
+
+        function createReview() {
+            const body = document.getElementById("review-body").value;
+            runRequest(reviewsUrl(""), {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: body
+            }, "新增 Review 成功");
+        }
+
+        function updateReview() {
+            const id = document.getElementById("review-id").value;
+            const body = document.getElementById("review-update-body").value;
+            runRequest(reviewsUrl(id), {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: body
+            }, "更新 Review 成功");
+        }
+
+        function deleteReview() {
+            const id = document.getElementById("review-delete-id").value;
+            runRequest(reviewsUrl(id), {
+                method: "DELETE"
+            }, "刪除 Review 成功");
+        }
+    </script>
+</body>
+</html>
