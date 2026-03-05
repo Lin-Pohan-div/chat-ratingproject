@@ -1,5 +1,6 @@
 package tw.rating.ratingproject.service;
 
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,9 @@ class ChatMessageServiceTestsTest {
 
     @Autowired
     private ChatMessageService chatMessageService;
+
+    @Autowired
+    private EntityManager entityManager;
 
     private Booking testBooking;
 
@@ -203,5 +207,23 @@ class ChatMessageServiceTestsTest {
 
         assertThat(messages).hasSize(1);
         assertThat(messages.get(0).getContent()).isEqualTo("Booking 1 message");
+    }
+
+    @Test
+    void testSaveMessage_bookingIdShouldNotBeNull() {
+        ChatMessage msg = new ChatMessage();
+        msg.setBooking(testBooking);
+        msg.setSenderId(1);
+        msg.setContent("Booking ID test");
+
+        ChatMessage saved = chatMessageService.save(msg);
+
+        // flush + clear 讓 JPA 一級快取失效，強制從 DB 重新載入
+        entityManager.flush();
+        entityManager.clear();
+        ChatMessage reloaded = chatMessageRepository.findById(saved.getId()).orElseThrow();
+
+        assertThat(reloaded.getBookingId()).isNotNull();
+        assertThat(reloaded.getBookingId()).isEqualTo(testBooking.getId());
     }
 }
