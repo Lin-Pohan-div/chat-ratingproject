@@ -9,6 +9,7 @@ import java.util.List;
 public interface ReviewRepository extends JpaRepository<Review, Integer> {
     List<Review> findByStudentId(Integer studentId);
     List<Review> findByTutorCourseId(Integer tutorCourseId);
+    Review findByBookingId(Integer bookingId);
 
     @Query("SELECT AVG(r.rating) FROM Review r WHERE r.tutorCourseId = :tutorCourseId")
     Double findAverageRatingByTutorCourseId(@Param("tutorCourseId") Integer tutorCourseId);
