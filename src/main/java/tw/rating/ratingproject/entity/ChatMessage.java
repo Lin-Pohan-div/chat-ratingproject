@@ -2,39 +2,28 @@ package tw.rating.ratingproject.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import java.time.LocalDateTime;
-import tw.rating.ratingproject.entity.Booking;
+
+import java.sql.Timestamp;
+
 
 @Data
 @Entity
-@Table(name = "chat_messages", schema = "learning")
+@Table(name = "chat_messages", schema = "deomDB")
 public class ChatMessage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
-    
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "booking_id", nullable = false, 
-                foreignKey = @ForeignKey(name = "fk_chat_messages_bookings",
-                                        value = ConstraintMode.CONSTRAINT))
-    private Booking booking;
+    @Column(name = "booking_id", nullable = false)
+    private Long bookingId;
 
-    @Column(name = "booking_id", insertable = false, updatable = false)
-    private Integer bookingId;
+    @Column(nullable = false)
+    private Byte role;
 
-    @Column(name = "sender_id", nullable = false)
-    private Integer senderId;
+    @Column(nullable = false, length = 1000)
+    private String message;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String content;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
+    @Column(name = "created_at", insertable = false, updatable = false)
+    private Timestamp createdAt;
 }
