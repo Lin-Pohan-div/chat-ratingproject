@@ -6,11 +6,10 @@ import org.springframework.data.jpa.repository.Query;
 import tw.rating.ratingproject.entity.Review;
 import java.util.List;
 
-public interface ReviewRepository extends JpaRepository<Review, Integer> {
-    List<Review> findByUserId(Integer userId);
-    List<Review> findByCourseId(Integer courseId);
-    Review findByBookingId(Long bookingId);
+public interface ReviewRepository extends JpaRepository<Review, Long> {
+    List<Review> findByUserId(Long userId);
+    List<Review> findByCourseId(Long courseId);
 
     @Query("SELECT AVG(r.rating) FROM Review r WHERE r.courseId = :courseId")
-    Double findAverageRatingByCourseId(@Param("courseId") Integer courseId);
+    Double findAverageRatingByCourseId(@Param("courseId") Long courseId);
 }

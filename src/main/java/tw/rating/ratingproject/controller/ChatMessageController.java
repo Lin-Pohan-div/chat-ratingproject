@@ -17,37 +17,36 @@ public class ChatMessageController {
     private final ChatMessageService chatMessageService;
 
     @GetMapping("/booking/{bookingId}")
-    public ResponseEntity<List<ChatMessage>> getByBookingId(@PathVariable Integer bookingId) {
+    public ResponseEntity<List<ChatMessage>> getByBookingId(@PathVariable Long bookingId) {
         return ResponseEntity.ok(chatMessageService.findByBookingId(bookingId));
     }
 
     @PostMapping
     public ResponseEntity<?> create(@RequestBody ChatMessageRequest request) {
         try {
-            // 驗證請求參數
             if (request.getBookingId() == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ErrorResponse("驗證失敗: Booking ID 不能為空"));
             }
-            
-            if (request.getSenderId() == null) {
+
+            if (request.getRole() == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ErrorResponse("驗證失敗: Sender ID 不能為空"));
+                    .body(new ErrorResponse("驗證失敗: Role 不能為空"));
             }
-            
-            if (request.getContent() == null || request.getContent().trim().isEmpty()) {
+
+            if (request.getMessage() == null || request.getMessage().trim().isEmpty()) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ErrorResponse("驗證失敗: 消息內容不能為空"));
             }
-            
-            ChatMessage chatMessage = chatMessageService.saveMessage(
+
+            ChatMessage chatMessage = chatMessageService.save(
                 request.getBookingId(),
-                request.getSenderId(),
-                request.getContent()
+                request.getRole(),
+                request.getMessage()
             );
-            
+
             return ResponseEntity.status(HttpStatus.CREATED).body(chatMessage);
-            
+
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse("錯誤: " + e.getMessage()));

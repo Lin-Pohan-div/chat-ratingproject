@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import tw.rating.ratingproject.dto.ReviewRequest;
 import tw.rating.ratingproject.entity.Review;
 import tw.rating.ratingproject.service.ReviewService;
 import java.util.List;
@@ -23,24 +24,24 @@ public class ReviewController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Review> getById(@PathVariable Integer id) {
+    public ResponseEntity<Review> getById(@PathVariable Long id) {
         return reviewService.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/user/{userId}")
-    public List<Review> getByUserId(@PathVariable Integer userId) {
+    public List<Review> getByUserId(@PathVariable Long userId) {
         return reviewService.findByUserId(userId);
     }
 
     @GetMapping("/course/{courseId}")
-    public List<Review> getByCourseId(@PathVariable Integer courseId) {
+    public List<Review> getByCourseId(@PathVariable Long courseId) {
         return reviewService.findByCourseId(courseId);
     }
 
     @GetMapping("/course/{courseId}/average-rating")
-    public ResponseEntity<Map<String, Object>> getAverageRating(@PathVariable Integer courseId) {
+    public ResponseEntity<Map<String, Object>> getAverageRating(@PathVariable Long courseId) {
         Double avg = reviewService.getAverageRating(courseId);
         return ResponseEntity.ok(Map.of(
                 "courseId", courseId,
@@ -51,9 +52,13 @@ public class ReviewController {
     @PostMapping
     public ResponseEntity<?> create(@RequestBody ReviewRequest request) {
         try {
-            if (request.getBookingId() == null) {
+            if (request.getUserId() == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(new ErrorResponse("驗證失敗: bookingId 不能為空"));
+                        .body(new ErrorResponse("驗證失敗: userId 不能為空"));
+            }
+            if (request.getCourseId() == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(new ErrorResponse("驗證失敗: courseId 不能為空"));
             }
             if (request.getRating() == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -61,9 +66,10 @@ public class ReviewController {
             }
 
             Review review = new Review();
-            review.setBookingId(request.getBookingId());
+            review.setUserId(request.getUserId());
+            review.setCourseId(request.getCourseId());
             review.setRating(request.getRating());
-            review.setComment(request.getContent());
+            review.setComment(request.getComment());
 
             Review saved = reviewService.save(review);
             return ResponseEntity.status(HttpStatus.CREATED).body(saved);
@@ -79,28 +85,15 @@ public class ReviewController {
         }
     }
 
-    public static class ReviewRequest {
-        private Long bookingId;
-        private Integer rating;
-        private String content;
-
-        public Long getBookingId() { return bookingId; }
-        public void setBookingId(Long bookingId) { this.bookingId = bookingId; }
-        public Integer getRating() { return rating; }
-        public void setRating(Integer rating) { this.rating = rating; }
-        public String getContent() { return content; }
-        public void setContent(String content) { this.content = content; }
-    }
-
     @PutMapping("/{id}")
-    public ResponseEntity<Review> update(@PathVariable Integer id, @RequestBody Review review) {
+    public ResponseEntity<Review> update(@PathVariable Long id, @RequestBody Review review) {
         return reviewService.update(id, review)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         return reviewService.deleteById(id)
                 ? ResponseEntity.noContent().build()
                 : ResponseEntity.notFound().build();
