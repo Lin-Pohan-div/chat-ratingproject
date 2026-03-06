@@ -151,6 +151,15 @@
       color: #fff;
     }
 
+    .btn-danger {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .col-4 {
+      grid-column: span 4;
+    }
+
     .status {
       margin-top: 10px;
       padding: 10px 12px;
@@ -205,7 +214,8 @@
         padding: 14px;
       }
 
-      .col-6 {
+      .col-6,
+      .col-4 {
         grid-column: span 12;
       }
 
@@ -219,7 +229,7 @@
   <main class="layout">
     <section class="card">
       <h1>ChatMessage Controller 驗證頁</h1>
-      <p>測試端點：<code>GET /api/chat-messages/booking/{bookingId}</code>、<code>POST /api/chat-messages</code>（POST 欄位：bookingId、role、message）</p>
+      <p>測試端點：<code>GET /api/chat-messages/booking/{bookingId}</code>、<code>POST /api/chat-messages</code>、<code>PUT /api/chat-messages/{id}</code>、<code>DELETE /api/chat-messages/{id}</code></p>
       <p class="muted">若你從 Spring Boot 專案直接開啟此頁，會預設使用同網域的 <code>/api</code>；也可手動改成其他主機位址。role：1 = 學生 / 2 = 老師。</p>
       <div class="grid">
         <div class="field">
@@ -268,6 +278,39 @@
       <div id="getStatus" class="status">尚未查詢</div>
       <div id="tableWrap"></div>
       <pre id="getResult">[]</pre>
+    </section>
+
+    <section class="card">
+      <h2>更新訊息 (PUT /api/chat-messages/{id})</h2>
+      <div class="grid">
+        <div class="field col-4">
+          <label for="putId">message id</label>
+          <input id="putId" type="number" min="1" value="1">
+        </div>
+        <div class="field">
+          <label for="putMessage">message（新內容）</label>
+          <textarea id="putMessage">Updated message content.</textarea>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn-warn" id="putBtn" type="button">送出 PUT</button>
+      </div>
+      <div id="putStatus" class="status">尚未送出請求</div>
+      <pre id="putResult">{}</pre>
+    </section>
+
+    <section class="card">
+      <h2>刪除訊息 (DELETE /api/chat-messages/{id})</h2>
+      <div class="grid">
+        <div class="field col-6">
+          <label for="deleteId">message id</label>
+          <input id="deleteId" type="number" min="1" value="1">
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn-danger" id="deleteBtn" type="button">送出 DELETE</button>
+      </div>
+      <div id="deleteStatus" class="status">尚未送出請求</div>
     </section>
   </main>
 
@@ -421,10 +464,75 @@
       setStatus(ids.getStatus, "結果已清除", false);
     }
 
+    async function putMessage() {
+      const id = Number(document.getElementById("putId").value);
+      const message = document.getElementById("putMessage").value.trim();
+      const putStatus = document.getElementById("putStatus");
+      const putResult = document.getElementById("putResult");
+
+      if (!Number.isInteger(id) || id <= 0) {
+        setStatus(putStatus, "欄位驗證失敗：id 需為正整數。", true);
+        return;
+      }
+      if (!message) {
+        setStatus(putStatus, "欄位驗證失敗：message 不可為空。", true);
+        return;
+      }
+
+      const url = createMessageEndpoint() + "/" + id;
+      try {
+        setStatus(putStatus, "送出中...", false);
+        const response = await fetch(url, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: message })
+        });
+
+        const text = await response.text();
+        const data = text ? JSON.parse(text) : {};
+        putResult.textContent = pretty(data);
+
+        if (!response.ok) {
+          setStatus(putStatus, "PUT 失敗，HTTP " + response.status, true);
+          return;
+        }
+        setStatus(putStatus, "PUT 成功，HTTP " + response.status, false);
+      } catch (err) {
+        setStatus(putStatus, "PUT 例外：" + (err && err.message ? err.message : String(err)), true);
+      }
+    }
+
+    async function deleteMessage() {
+      const id = Number(document.getElementById("deleteId").value);
+      const deleteStatus = document.getElementById("deleteStatus");
+
+      if (!Number.isInteger(id) || id <= 0) {
+        setStatus(deleteStatus, "欄位驗證失敗：id 需為正整數。", true);
+        return;
+      }
+      if (!confirm("確定要刪除 message id = " + id + " 嗎？")) return;
+
+      const url = createMessageEndpoint() + "/" + id;
+      try {
+        setStatus(deleteStatus, "送出中...", false);
+        const response = await fetch(url, { method: "DELETE" });
+
+        if (!response.ok) {
+          setStatus(deleteStatus, "DELETE 失敗，HTTP " + response.status, true);
+          return;
+        }
+        setStatus(deleteStatus, "DELETE 成功，HTTP " + response.status + "（id = " + id + " 已刪除）", false);
+      } catch (err) {
+        setStatus(deleteStatus, "DELETE 例外：" + (err && err.message ? err.message : String(err)), true);
+      }
+    }
+
     document.getElementById("createBtn").addEventListener("click", postMessage);
     document.getElementById("queryBtn").addEventListener("click", queryMessages);
     document.getElementById("fillSampleBtn").addEventListener("click", fillSample);
     document.getElementById("clearBtn").addEventListener("click", clearGetResult);
+    document.getElementById("putBtn").addEventListener("click", putMessage);
+    document.getElementById("deleteBtn").addEventListener("click", deleteMessage);
   </script>
 </body>
 </html>

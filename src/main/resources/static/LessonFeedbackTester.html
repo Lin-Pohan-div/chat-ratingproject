@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LessonFeedback Controller Tester</title>
+  <style>
+    :root {
+      --bg-1: #f4efe6;
+      --bg-2: #d9ead3;
+      --card: #fffdf8;
+      --text: #1f2a24;
+      --muted: #4f5d55;
+      --accent: #12664f;
+      --accent-2: #ea7317;
+      --danger: #b42318;
+      --border: #c7d7cc;
+      --shadow: 0 12px 32px rgba(24, 48, 36, 0.12);
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "IBM Plex Sans", "Noto Sans TC", "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(80rem 50rem at 20% -10%, rgba(255,255,255,0.65), transparent 65%),
+        radial-gradient(50rem 40rem at 90% 10%, rgba(18,102,79,0.18), transparent 70%),
+        linear-gradient(160deg, var(--bg-1), var(--bg-2));
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .layout { max-width: 1024px; margin: 0 auto; display: grid; gap: 16px; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+    }
+
+    h1 { margin: 0; font-family: "Space Grotesk","IBM Plex Sans",sans-serif; font-size: clamp(1.5rem,2vw + 1rem,2.4rem); letter-spacing: 0.02em; }
+    h2 { margin: 0 0 12px; font-size: 1.2rem; }
+    p  { margin: 8px 0; color: var(--muted); line-height: 1.5; }
+    .muted { color: var(--muted); font-size: 0.9rem; }
+
+    .grid { display: grid; gap: 12px; grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .field { grid-column: span 12; display: grid; gap: 6px; }
+    .col-6 { grid-column: span 6; }
+    .col-4 { grid-column: span 4; }
+
+    label { font-size: 0.92rem; color: var(--muted); }
+
+    input, textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+      font-family: "IBM Plex Mono", Consolas, monospace;
+      background: #fff;
+      color: var(--text);
+    }
+
+    textarea { min-height: 80px; resize: vertical; }
+
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 10px 16px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform 120ms ease, opacity 120ms ease;
+    }
+    button:hover  { transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+
+    .btn-primary   { background: var(--accent);  color: #fff; }
+    .btn-secondary { background: #ecf4f1; color: var(--text); border: 1px solid var(--border); }
+    .btn-warn      { background: var(--accent-2); color: #fff; }
+    .btn-danger    { background: var(--danger);   color: #fff; }
+
+    .status {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #eff7f3;
+      color: var(--text);
+      border: 1px solid var(--border);
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+    }
+    .status.error { background: #fff2f2; border-color: #f3c7c7; color: var(--danger); }
+
+    .result-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 0.9rem;
+      overflow: hidden;
+      border-radius: 10px;
+    }
+    .result-table th,
+    .result-table td {
+      border: 1px solid var(--border);
+      padding: 8px;
+      text-align: left;
+      vertical-align: top;
+      word-break: break-word;
+    }
+    .result-table thead { background: #edf5f2; }
+
+    pre {
+      margin: 10px 0 0;
+      background: #10251d;
+      color: #ddf5e9;
+      border-radius: 12px;
+      padding: 12px;
+      overflow-x: auto;
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 720px) {
+      body { padding: 14px; }
+      .col-6, .col-4 { grid-column: span 12; }
+      .card { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+<main class="layout">
+
+  <!-- Header -->
+  <section class="card">
+    <h1>LessonFeedback Controller 驗證頁</h1>
+    <p>測試端點：<code>GET /api/lesson-feedbacks</code>、<code>GET /api/lesson-feedbacks/{id}</code>、
+      <code>GET /api/lesson-feedbacks/lesson/{lessonId}</code>、<code>GET /api/lesson-feedbacks/lesson/{lessonId}/average-rating</code>、
+      <code>POST</code>、<code>PUT /{id}</code>、<code>DELETE /{id}</code></p>
+    <p class="muted">rating：1–5 分。comment 可空。</p>
+    <div class="grid">
+      <div class="field">
+        <label for="baseUrl">API Base URL</label>
+        <input id="baseUrl" type="text" value="/api">
+      </div>
+    </div>
+  </section>
+
+  <!-- POST -->
+  <section class="card">
+    <h2>新增回饋 (POST)</h2>
+    <div class="grid">
+      <div class="field col-6">
+        <label for="postLessonId">lessonId</label>
+        <input id="postLessonId" type="number" min="1" value="1">
+      </div>
+      <div class="field col-6">
+        <label for="postRating">rating（1–5）</label>
+        <input id="postRating" type="number" min="1" max="5" value="5">
+      </div>
+      <div class="field">
+        <label for="postComment">comment（選填）</label>
+        <textarea id="postComment">學生表現優異，主動提問。</textarea>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn-primary" id="postBtn" type="button">送出 POST</button>
+      <button class="btn-secondary" id="postFillBtn" type="button">填入範例</button>
+    </div>
+    <div id="postStatus" class="status">尚未送出請求</div>
+    <pre id="postResult">{}</pre>
+  </section>
+
+  <!-- GET all -->
+  <section class="card">
+    <h2>查詢所有回饋 (GET /api/lesson-feedbacks)</h2>
+    <div class="actions">
+      <button class="btn-primary" id="getAllBtn" type="button">送出 GET</button>
+      <button class="btn-warn" id="getAllClearBtn" type="button">清除結果</button>
+    </div>
+    <div id="getAllStatus" class="status">尚未查詢</div>
+    <div id="getAllTableWrap"></div>
+    <pre id="getAllResult">[]</pre>
+  </section>
+
+  <!-- GET by ID -->
+  <section class="card">
+    <h2>依 ID 查詢 (GET /api/lesson-feedbacks/{id})</h2>
+    <div class="grid">
+      <div class="field col-6">
+        <label for="getById">feedback id</label>
+        <input id="getById" type="number" min="1" value="1">
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn-primary" id="getByIdBtn" type="button">送出 GET</button>
+    </div>
+    <div id="getByIdStatus" class="status">尚未查詢</div>
+    <pre id="getByIdResult">{}</pre>
+  </section>
+
+  <!-- GET by lessonId -->
+  <section class="card">
+    <h2>依 lessonId 查詢 (GET /api/lesson-feedbacks/lesson/{lessonId})</h2>
+    <div class="grid">
+      <div class="field col-6">
+        <label for="getByLessonId">lessonId</label>
+        <input id="getByLessonId" type="number" min="1" value="1">
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn-primary" id="getByLessonBtn" type="button">送出 GET</button>
+      <button class="btn-warn" id="getByLessonClearBtn" type="button">清除結果</button>
+    </div>
+    <div id="getByLessonStatus" class="status">尚未查詢</div>
+    <div id="getByLessonTableWrap"></div>
+    <pre id="getByLessonResult">[]</pre>
+  </section>
+
+  <!-- GET average rating -->
+  <section class="card">
+    <h2>查詢平均評分 (GET /api/lesson-feedbacks/lesson/{lessonId}/average-rating)</h2>
+    <div class="grid">
+      <div class="field col-6">
+        <label for="avgLessonId">lessonId</label>
+        <input id="avgLessonId" type="number" min="1" value="1">
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn-primary" id="avgBtn" type="button">送出 GET</button>
+    </div>
+    <div id="avgStatus" class="status">尚未查詢</div>
+    <pre id="avgResult">{}</pre>
+  </section>
+
+  <!-- PUT -->
+  <section class="card">
+    <h2>更新回饋 (PUT /api/lesson-feedbacks/{id})</h2>
+    <div class="grid">
+      <div class="field col-4">
+        <label for="putId">feedback id</label>
+        <input id="putId" type="number" min="1" value="1">
+      </div>
+      <div class="field col-4">
+        <label for="putRating">rating（1–5）</label>
+        <input id="putRating" type="number" min="1" max="5" value="4">
+      </div>
+      <div class="field">
+        <label for="putComment">comment（選填）</label>
+        <textarea id="putComment">已更新的評語內容。</textarea>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn-warn" id="putBtn" type="button">送出 PUT</button>
+    </div>
+    <div id="putStatus" class="status">尚未送出請求</div>
+    <pre id="putResult">{}</pre>
+  </section>
+
+  <!-- DELETE -->
+  <section class="card">
+    <h2>刪除回饋 (DELETE /api/lesson-feedbacks/{id})</h2>
+    <div class="grid">
+      <div class="field col-6">
+        <label for="deleteId">feedback id</label>
+        <input id="deleteId" type="number" min="1" value="1">
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn-danger" id="deleteBtn" type="button">送出 DELETE</button>
+    </div>
+    <div id="deleteStatus" class="status">尚未送出請求</div>
+  </section>
+
+</main>
+
+<script>
+  function base() {
+    const v = document.getElementById("baseUrl").value.trim();
+    return (v || "/api").replace(/\/$/, "");
+  }
+
+  function endpoint(path) { return base() + "/lesson-feedbacks" + path; }
+
+  function setStatus(id, text, isError) {
+    const el = document.getElementById(id);
+    el.textContent = text;
+    el.classList.toggle("error", !!isError);
+  }
+
+  function pretty(v) { return JSON.stringify(v, null, 2); }
+
+  function escapeHtml(str) {
+    return String(str ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function renderTable(wrapId, list) {
+    const wrap = document.getElementById(wrapId);
+    if (!Array.isArray(list) || list.length === 0) { wrap.innerHTML = ""; return; }
+    const header = "<thead><tr><th>id</th><th>lessonId</th><th>rating</th><th>comment</th></tr></thead>";
+    const rows = list.map(function(m) {
+      return "<tr>" +
+        "<td>" + escapeHtml(m.id) + "</td>" +
+        "<td>" + escapeHtml(m.lessonId) + "</td>" +
+        "<td>" + escapeHtml(m.rating) + "</td>" +
+        "<td>" + escapeHtml(m.comment) + "</td>" +
+        "</tr>";
+    }).join("");
+    wrap.innerHTML = "<table class=\"result-table\">" + header + "<tbody>" + rows + "</tbody></table>";
+  }
+
+  async function doFetch(url, options, statusId, resultId, onSuccess) {
+    try {
+      setStatus(statusId, "請求中...", false);
+      const res = await fetch(url, options);
+      const text = await res.text();
+      const data = text ? JSON.parse(text) : (options.method === "DELETE" ? null : {});
+      if (resultId) document.getElementById(resultId).textContent = data !== null ? pretty(data) : "(無內容)";
+      if (!res.ok) { setStatus(statusId, "失敗，HTTP " + res.status, true); return; }
+      if (onSuccess) onSuccess(res, data);
+      else setStatus(statusId, "成功，HTTP " + res.status, false);
+    } catch (err) {
+      setStatus(statusId, "例外：" + (err && err.message ? err.message : String(err)), true);
+    }
+  }
+
+  // POST
+  document.getElementById("postBtn").addEventListener("click", function() {
+    const lessonId = Number(document.getElementById("postLessonId").value);
+    const rating   = Number(document.getElementById("postRating").value);
+    const comment  = document.getElementById("postComment").value.trim();
+
+    if (!Number.isInteger(lessonId) || lessonId <= 0) { setStatus("postStatus", "lessonId 需為正整數", true); return; }
+    if (!Number.isInteger(rating) || rating < 1 || rating > 5) { setStatus("postStatus", "rating 需為 1–5 的整數", true); return; }
+
+    const payload = { lessonId, rating };
+    if (comment) payload.comment = comment;
+
+    doFetch(endpoint(""), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    }, "postStatus", "postResult", function(res) {
+      setStatus("postStatus", "POST 成功，HTTP " + res.status, false);
+    });
+  });
+
+  document.getElementById("postFillBtn").addEventListener("click", function() {
+    document.getElementById("postLessonId").value = "1";
+    document.getElementById("postRating").value   = String(Math.floor(Math.random() * 5) + 1);
+    document.getElementById("postComment").value  = "測試回饋 " + new Date().toISOString();
+    setStatus("postStatus", "已填入範例資料", false);
+  });
+
+  // GET all
+  document.getElementById("getAllBtn").addEventListener("click", function() {
+    doFetch(endpoint(""), { method: "GET" }, "getAllStatus", "getAllResult", function(res, data) {
+      const count = Array.isArray(data) ? data.length : 0;
+      renderTable("getAllTableWrap", data);
+      setStatus("getAllStatus", "GET 成功，HTTP " + res.status + "，共 " + count + " 筆", false);
+    });
+  });
+
+  document.getElementById("getAllClearBtn").addEventListener("click", function() {
+    document.getElementById("getAllResult").textContent = "[]";
+    document.getElementById("getAllTableWrap").innerHTML = "";
+    setStatus("getAllStatus", "結果已清除", false);
+  });
+
+  // GET by ID
+  document.getElementById("getByIdBtn").addEventListener("click", function() {
+    const id = Number(document.getElementById("getById").value);
+    if (!Number.isInteger(id) || id <= 0) { setStatus("getByIdStatus", "id 需為正整數", true); return; }
+    doFetch(endpoint("/" + id), { method: "GET" }, "getByIdStatus", "getByIdResult", function(res) {
+      setStatus("getByIdStatus", "GET 成功，HTTP " + res.status, false);
+    });
+  });
+
+  // GET by lessonId
+  document.getElementById("getByLessonBtn").addEventListener("click", function() {
+    const lessonId = Number(document.getElementById("getByLessonId").value);
+    if (!Number.isInteger(lessonId) || lessonId <= 0) { setStatus("getByLessonStatus", "lessonId 需為正整數", true); return; }
+    doFetch(endpoint("/lesson/" + lessonId), { method: "GET" }, "getByLessonStatus", "getByLessonResult", function(res, data) {
+      const count = Array.isArray(data) ? data.length : 0;
+      renderTable("getByLessonTableWrap", data);
+      setStatus("getByLessonStatus", "GET 成功，HTTP " + res.status + "，共 " + count + " 筆", false);
+    });
+  });
+
+  document.getElementById("getByLessonClearBtn").addEventListener("click", function() {
+    document.getElementById("getByLessonResult").textContent = "[]";
+    document.getElementById("getByLessonTableWrap").innerHTML = "";
+    setStatus("getByLessonStatus", "結果已清除", false);
+  });
+
+  // GET average rating
+  document.getElementById("avgBtn").addEventListener("click", function() {
+    const lessonId = Number(document.getElementById("avgLessonId").value);
+    if (!Number.isInteger(lessonId) || lessonId <= 0) { setStatus("avgStatus", "lessonId 需為正整數", true); return; }
+    doFetch(endpoint("/lesson/" + lessonId + "/average-rating"), { method: "GET" }, "avgStatus", "avgResult", function(res) {
+      setStatus("avgStatus", "GET 成功，HTTP " + res.status, false);
+    });
+  });
+
+  // PUT
+  document.getElementById("putBtn").addEventListener("click", function() {
+    const id      = Number(document.getElementById("putId").value);
+    const rating  = Number(document.getElementById("putRating").value);
+    const comment = document.getElementById("putComment").value.trim();
+
+    if (!Number.isInteger(id) || id <= 0) { setStatus("putStatus", "id 需為正整數", true); return; }
+    if (!Number.isInteger(rating) || rating < 1 || rating > 5) { setStatus("putStatus", "rating 需為 1–5 的整數", true); return; }
+
+    const payload = { rating };
+    if (comment) payload.comment = comment;
+
+    doFetch(endpoint("/" + id), {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    }, "putStatus", "putResult", function(res) {
+      setStatus("putStatus", "PUT 成功，HTTP " + res.status, false);
+    });
+  });
+
+  // DELETE
+  document.getElementById("deleteBtn").addEventListener("click", function() {
+    const id = Number(document.getElementById("deleteId").value);
+    if (!Number.isInteger(id) || id <= 0) { setStatus("deleteStatus", "id 需為正整數", true); return; }
+    if (!confirm("確定要刪除 feedback id = " + id + " 嗎？")) return;
+    doFetch(endpoint("/" + id), { method: "DELETE" }, "deleteStatus", null, function(res) {
+      setStatus("deleteStatus", "DELETE 成功，HTTP " + res.status + "（id = " + id + " 已刪除）", false);
+    });
+  });
+</script>
+</body>
+</html>
