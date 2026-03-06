@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import tw.rating.ratingproject.dto.ChatMessageRequest;
 import tw.rating.ratingproject.entity.ChatMessage;
 import tw.rating.ratingproject.service.ChatMessageService;
 import java.util.List;

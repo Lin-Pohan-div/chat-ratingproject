@@ -1,4 +1,4 @@
-package tw.rating.ratingproject.controller;
+package tw.rating.ratingproject.dto;
 
 import lombok.Data;
 
