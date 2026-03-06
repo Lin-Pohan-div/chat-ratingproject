@@ -30,7 +30,10 @@ class ChatMessageControllerTest {
     @Autowired
     private BookingRepository bookingRepository;
 
-    @Autowired
+    // ObjectMapper sometimes isn't registered by the test context (Jackson autoconfiguration
+    // may be skipped in our lightweight test configuration).  Make the injection optional and
+    // fall back to a plain instance in setUp().
+    @Autowired(required = false)
     private ObjectMapper objectMapper;
 
     private MockMvc mockMvc;
@@ -38,6 +41,11 @@ class ChatMessageControllerTest {
 
     @BeforeEach
     void setUp() {
+        // ensure we have an ObjectMapper even if the context didn't provide one
+        if (objectMapper == null) {
+            objectMapper = new ObjectMapper();
+        }
+
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
         bookingRepository.deleteAll();

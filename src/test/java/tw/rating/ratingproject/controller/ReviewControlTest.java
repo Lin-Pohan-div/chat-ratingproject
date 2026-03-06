@@ -25,13 +25,18 @@ class ReviewControlTest {
     @Autowired
     private WebApplicationContext webApplicationContext;
 
-    @Autowired
+    // Jackson's ObjectMapper isn't always available in the minimal test context, so
+    // autowire it optionally and fall back to creating one ourselves.
+    @Autowired(required = false)
     private ObjectMapper objectMapper;
 
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
+        if (objectMapper == null) {
+            objectMapper = new ObjectMapper();
+        }
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
     }
 

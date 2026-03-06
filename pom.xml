@@ -88,6 +88,20 @@
 			<version>5.11.0</version>
 			<scope>test</scope>
 		</dependency>
+
+        <!-- 如果是純粹需要 Jackson -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.15.2</version> <!-- 或與你專案其他 Jackson/Spring Boot 版本一致的版本 -->
+        </dependency>
+
+        <!-- 或者：若是 Spring Boot 專案，已經含了 Jackson -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <!-- starter-web 包含 jackson-databind、jackson-core 等 -->
+        </dependency>
 	</dependencies>
 
 	<build>

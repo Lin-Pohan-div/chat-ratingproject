@@ -8,7 +8,7 @@ import java.sql.Timestamp;
 
 @Data
 @Entity
-@Table(name = "chat_messages", schema = "deomDB")
+@Table(name = "chatmessages")
 public class ChatMessage {
 
     @Id

@@ -1,28 +1,152 @@
--- H2 測試用種子資料
--- 目標:
--- 1) Tester 預設 bookingId=1 可直接 POST review，不會碰到「已有評論」
--- 2) Reviews 預設可支援 user/course 查詢與平均評分測試
--- 3) Chat messages 可支援 bookingId=1 的查詢測試
+-- H2 initialization script for demoDb schema
+-- ensures the correct schema is selected before any DDL/DML
 
--- bookings columns: order_id, user_id, course_id, lesson_count, unit_price, discount_price, status, created_at
-INSERT INTO learning.bookings (order_id, user_id, course_id, lesson_count, unit_price, discount_price, status, created_at) VALUES
-(1, 1, 1, 3, 100, NULL, 1, CURRENT_TIMESTAMP),
-(1, 1, 1, 2, 120, 10, 2, CURRENT_TIMESTAMP),
-(2, 2, 1, 1, 150, NULL, 2, CURRENT_TIMESTAMP),
-(3, 3, 2, 4, 90, 5, 1, CURRENT_TIMESTAMP),
-(4, 1, 2, 2, 110, NULL, 3, CURRENT_TIMESTAMP),
-(5, 4, 3, 2, 130, NULL, 2, CURRENT_TIMESTAMP);
+SET SCHEMA demoDb;
 
--- reviews columns: booking_id, user_id, course_id, rating, comment, created_at
--- 注意: 不放 booking_id=1，保留給 POST /api/reviews 建立新評論
-INSERT INTO learning.reviews (booking_id, user_id, course_id, rating, comment, created_at) VALUES
-(2, 1, 1, 4, 'Updated comment', CURRENT_TIMESTAMP),
-(3, 2, 1, 4, 'Very good', CURRENT_TIMESTAMP),
-(4, 3, 2, 3, 'Average experience', CURRENT_TIMESTAMP),
-(5, 1, 2, 2, 'Could improve', CURRENT_TIMESTAMP),
-(6, 4, 3, 5, 'Outstanding', CURRENT_TIMESTAMP);
+-- add seed data here if needed
+-- ============================================================
+-- Demo版 假資料 Seed
+-- ============================================================
 
--- chat_messages columns: booking_id, sender_id, content, created_at
-INSERT INTO learning.chat_messages (booking_id, sender_id, content, created_at) VALUES
-(1, 1, 'Hello, this message is from seed data.', CURRENT_TIMESTAMP),
-(1, 101, 'Hi! How can I help you today?', CURRENT_TIMESTAMP);
+USE demo_db;
+
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE chat_messages;
+TRUNCATE TABLE lesson_feedback;
+TRUNCATE TABLE reviews;
+TRUNCATE TABLE lessons;
+TRUNCATE TABLE bookings;
+TRUNCATE TABLE orders;
+TRUNCATE TABLE tutor_schedules;
+TRUNCATE TABLE courses;
+TRUNCATE TABLE tutors;
+TRUNCATE TABLE users;
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- ============================================================
+-- 1. users（3 老師 / 5 學生 / 1 管理員）
+-- ============================================================
+INSERT INTO users (id, name, email, password, birthday, role, is_admin, created_at) VALUES
+(1, '侯君儒',   'hou@demo.com',    SHA2('pass1234', 256), '1985-03-12', 2, 0, '2024-01-10 09:00:00'),
+(2, 'Yu Shawn', 'shawn@demo.com',  SHA2('pass1234', 256), '1990-07-22', 2, 0, '2024-01-11 10:00:00'),
+(3, '梁荃翔',   'liang@demo.com',  SHA2('pass1234', 256), '1988-11-05', 2, 0, '2024-01-12 11:00:00'),
+(4, '伯罕林',   'bohan@demo.com',  SHA2('pass1234', 256), '2000-04-18', 1, 0, '2024-02-01 08:00:00'),
+(5, '吳騏亦',   'wu@demo.com',     SHA2('pass1234', 256), '1999-09-30', 1, 0, '2024-02-05 08:30:00'),
+(6, 'Lianne',   'lianne@demo.com', SHA2('pass1234', 256), '2001-12-01', 1, 0, '2024-02-10 09:00:00'),
+(7, '陳小明',   'chen@demo.com',   SHA2('pass1234', 256), '1998-06-15', 1, 0, '2024-02-15 09:30:00'),
+(8, '林佳音',   'lin@demo.com',    SHA2('pass1234', 256), '2002-02-28', 1, 0, '2024-02-20 10:00:00'),
+(9, 'Admin',    'admin@demo.com',  SHA2('admin5678', 256),'1980-01-01', 2, 1, '2024-01-01 00:00:00');
+
+-- ============================================================
+-- 2. tutors
+-- ============================================================
+INSERT INTO tutors (id, intro, certificate, video_url_1, video_url_2, bank_code, bank_account) VALUES
+(1, '擁有 10 年英語教學經驗，專攻商務英文與口說訓練。',       'TESOL 國際英語教學認證',       'https://youtu.be/demo_hou_1',   'https://youtu.be/demo_hou_2',   '822', '123456789012'),
+(2, '前 Google 工程師，擅長 Python、資料科學與機器學習課程。','Google 專業雲端工程師認證',     'https://youtu.be/demo_shawn_1', NULL,                            '004', '987654321098'),
+(3, '多益滿分講師，專注英語聽力與閱讀理解。',                 'TOEIC 金色證書 990 分',         'https://youtu.be/demo_liang_1', 'https://youtu.be/demo_liang_2', '013', '567890123456');
+
+-- ============================================================
+-- 3. courses
+-- ============================================================
+INSERT INTO courses (id, tutor_id, name, subject, level, description, price, is_active) VALUES
+(1, 1, '商務英文口說特訓班',  1, 2, '針對職場簡報、會議、Email 的進階口說課程，搭配真實情境演練。', 800,  1),
+(2, 1, '英文零基礎入門',      1, 1, '從 26 個字母到基礎對話，適合完全沒有基礎的學習者。',           500,  1),
+(3, 2, 'Python 資料分析實戰', 2, 2, '使用 Pandas、Matplotlib 完成實際數據分析專案。',               1000, 1),
+(4, 2, 'Python 程式設計入門', 2, 1, '從變數、迴圈到函式，帶你打好 Python 基礎。',                   700,  1),
+(5, 3, '多益 TOEIC 衝分課程', 1, 3, '針對多益聽力與閱讀題型深度解析，目標 850+。',                  900,  1),
+(6, 3, '英文閱讀理解技巧班',  1, 2, '訓練快速閱讀與關鍵字抓取能力，適合中級學習者。',               650,  0);
+
+-- ============================================================
+-- 4. tutor_schedules
+-- ============================================================
+INSERT INTO tutor_schedules (id, tutor_id, weekday, hour) VALUES
+-- 侯君儒（週一/三/五，10~11點）
+(1,  1, 1, 10),(2,  1, 1, 11),(3,  1, 3, 10),(4,  1, 3, 11),(5,  1, 5, 10),(6,  1, 5, 11),
+-- Yu Shawn（週二/四，14~15點）
+(7,  2, 2, 14),(8,  2, 2, 15),(9,  2, 4, 14),(10, 2, 4, 15),
+-- 梁荃翔（週六，9~11點）
+(11, 3, 6, 9),(12, 3, 6, 10),(13, 3, 6, 11);
+
+-- ============================================================
+-- 5. orders
+-- ============================================================
+INSERT INTO orders (id, merchant_trade_no, user_id, total_amount, created_at) VALUES
+(1, 'ECPay20240301001', 4, 4000, '2024-03-01 14:22:00'),
+(2, 'ECPay20240310002', 5, 3500, '2024-03-10 10:05:00'),
+(3, 'ECPay20240315003', 6, 1800, '2024-03-15 16:40:00'),
+(4, 'ECPay20240320004', 7, 2700, '2024-03-20 11:15:00');
+
+-- ============================================================
+-- 6. bookings（status: 0 cancelled / 1 pending / 2 paid / 3 completed）
+-- ============================================================
+INSERT INTO bookings (id, order_id, course_id, unit_price, discount_price, lesson_count, status) VALUES
+(1, 1, 3, 1000, NULL, 4, 3),   -- 伯罕林 × Python 資料分析 4 堂 → completed
+(2, 1, 1,  800, NULL, 0, 0),   -- 伯罕林 × 商務英文（取消）→ cancelled
+(3, 2, 4,  700,  630, 5, 2),   -- 吳騏亦 × Python 入門 5 堂（折扣）→ paid
+(4, 3, 2,  500, NULL, 2, 2),   -- Lianne  × 英文零基礎 2 堂 → paid
+(5, 3, 5,  900,  810, 1, 1),   -- Lianne  × 多益課程（待付款）→ pending
+(6, 4, 1,  800, NULL, 3, 3);   -- 陳小明 × 商務英文 3 堂 → completed
+
+-- ============================================================
+-- 7. lessons（status: 1 排程中 / 2 已完成 / 3 已取消）
+-- ============================================================
+INSERT INTO lessons (id, booking_id, tutor_id, student_id, date, hour, status) VALUES
+-- booking 1（伯罕林 × Yu Shawn，Python 資料分析 4 堂全完成）
+(1,  1, 2, 4, '2024-03-04', 14, 2),
+(2,  1, 2, 4, '2024-03-06', 14, 2),
+(3,  1, 2, 4, '2024-03-11', 15, 2),
+(4,  1, 2, 4, '2024-03-13', 15, 2),
+-- booking 2（取消）
+(5,  2, 1, 4, '2024-03-05', 10, 3),
+-- booking 3（吳騏亦 × Yu Shawn，Python 入門 5 堂，部分排程中）
+(6,  3, 2, 5, '2024-03-12', 14, 2),
+(7,  3, 2, 5, '2024-03-14', 14, 2),
+(8,  3, 2, 5, '2024-03-19', 15, 2),
+(9,  3, 2, 5, '2024-03-26', 14, 1),
+(10, 3, 2, 5, '2024-04-02', 15, 1),
+-- booking 4（Lianne × 侯君儒，英文零基礎 2 堂）
+(11, 4, 1, 6, '2024-03-18', 10, 2),
+(12, 4, 1, 6, '2024-03-20', 11, 1),
+-- booking 6（陳小明 × 侯君儒，商務英文 3 堂全完成）
+(13, 6, 1, 7, '2024-03-22', 10, 2),
+(14, 6, 1, 7, '2024-03-25', 11, 2),
+(15, 6, 1, 7, '2024-03-27', 10, 2);
+
+-- ============================================================
+-- 8. reviews
+-- ============================================================
+INSERT INTO reviews (id, user_id, course_id, rating, comment) VALUES
+(1, 4, 3, 5, '老師講解非常清楚，範例豐富，每堂課都收穫滿滿！'),
+(2, 5, 4, 4, 'Python 基礎打得很紮實，作業設計也很有趣，推薦初學者。'),
+(3, 6, 2, 5, '從完全不會到能說簡單對話，老師很有耐心！'),
+(4, 7, 1, 5, '商務英文大幅提升，下次面試更有信心了！');
+
+-- ============================================================
+-- 9. lesson_feedback
+-- ============================================================
+INSERT INTO lesson_feedback (id, lesson_id, rating, comment) VALUES
+(1,  1,  5, '伯罕同學學習態度積極，理解速度很快，建議挑戰進階課程。'),
+(2,  2,  5, '本堂 Pandas 操作掌握良好，繼續加油！'),
+(3,  3,  4, '視覺化部分需要多練習，其餘表現優秀。'),
+(4,  4,  5, '專案成果令人印象深刻，非常用心。'),
+(5,  6,  4, '基礎語法紮實，下堂課將進入物件導向。'),
+(6,  7,  5, '進步明顯，函式應用掌握得不錯。'),
+(7,  8,  4, '迴圈邏輯需再複習，整體表現中上。'),
+(8,  11, 5, '發音進步很多，繼續保持！'),
+(9,  13, 5, '簡報英文表達流暢，邏輯清晰。'),
+(10, 14, 4, 'Email 寫作格式已掌握，下堂課練習會議用語。'),
+(11, 15, 5, '整體表現優異，已能應對真實職場情境。');
+
+-- ============================================================
+-- 10. chat_messages
+-- ============================================================
+INSERT INTO chat_messages (id, booking_id, role, message, created_at) VALUES
+(1, 1, 1, '老師好，請問上課需要準備什麼環境？',                              '2024-03-03 20:00:00'),
+(2, 1, 2, '請先安裝 Python 3.11 與 Jupyter Notebook，我會寄安裝教學給你。', '2024-03-03 20:30:00'),
+(3, 1, 1, '收到，謝謝老師！',                                               '2024-03-03 21:00:00'),
+(4, 3, 1, '老師，我對 for loop 還不太懂，下堂課可以多講一點嗎？',            '2024-03-18 19:00:00'),
+(5, 3, 2, '沒問題，我會多準備幾個練習題，一起搞定它！',                      '2024-03-18 19:20:00'),
+(6, 4, 1, '侯老師您好，我完全沒有英文基礎，課程難度會不會太高？',            '2024-03-17 09:00:00'),
+(7, 4, 2, '完全不用擔心，我們會從最基礎開始，循序漸進，加油！',             '2024-03-17 09:45:00'),
+(8, 6, 1, '老師，第三堂課後我順利通過了面試！真的很感謝您！',               '2024-03-28 10:00:00'),
+(9, 6, 2, '太棒了！恭喜你！有任何需要歡迎再來找我上課。',                   '2024-03-28 10:15:00');
