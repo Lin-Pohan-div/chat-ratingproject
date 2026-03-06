@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import tw.rating.ratingproject.dto.ChatMessageRequest;
 import tw.rating.ratingproject.entity.ChatMessage;
 import tw.rating.ratingproject.service.ChatMessageService;
 import java.util.List;
@@ -24,7 +26,7 @@ public class ChatMessageController {
     @PostMapping
     public ResponseEntity<?> create(@RequestBody ChatMessageRequest request) {
         try {
-            // 驗證請求參數
+            
             if (request.getBookingId() == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ErrorResponse("驗證失敗: Booking ID 不能為空"));

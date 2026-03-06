@@ -24,7 +24,7 @@ public class Review {
     @Column(name = "course_id", nullable = false)
     private Long courseId;
 
-    // 1~5 星評分
+   
     @NotNull(message = "評分不能為空")
     private Integer rating;
 
