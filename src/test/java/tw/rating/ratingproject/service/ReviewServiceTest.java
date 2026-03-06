@@ -1,15 +1,14 @@
 package tw.rating.ratingproject.service;
 
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-import tw.rating.ratingproject.entity.Booking;
 import tw.rating.ratingproject.entity.Review;
-import tw.rating.ratingproject.repository.BookingRepository;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -22,71 +21,73 @@ class ReviewServiceTest {
     @Autowired
     private ReviewService reviewService;
 
-    @Autowired
-    private BookingRepository bookingRepository;
-
-    private Booking testBooking;
-
-    @BeforeEach
-    void setUp() {
-        testBooking = new Booking();
-        testBooking.setOrderId(1L);
-        testBooking.setUserId(1L);
-        testBooking.setCourseId(101L);
-        testBooking.setLessonCount(1);
-        testBooking.setUnitPrice(100);
-        testBooking.setStatus(2);
-        testBooking = bookingRepository.save(testBooking);
-    }
-
     @Test
     void testSaveReview_withValidData_shouldPersist() {
         Review review = new Review();
-        review.setBookingId(testBooking.getId());
-        review.setRating(5);
+        review.setUserId(1L);
+        review.setCourseId(101L);
+        review.setRating((byte) 5);
         review.setComment("Excellent tutor");
 
         Review saved = reviewService.save(review);
 
         assertThat(saved).isNotNull();
         assertThat(saved.getId()).isNotNull();
-        assertThat(saved.getRating()).isEqualTo(5);
+        assertThat(saved.getRating()).isEqualTo((byte) 5);
     }
 
     @Test
-    void testFindByBookingId_withReview_shouldReturnReview() {
+    void testFindByCourseId_withReview_shouldReturnReview() {
         Review review = new Review();
-        review.setBookingId(testBooking.getId());
-        review.setRating(4);
+        review.setUserId(1L);
+        review.setCourseId(101L);
+        review.setRating((byte) 4);
         review.setComment("Good session");
         reviewService.save(review);
 
-        Review found = reviewService.findByBookingId(testBooking.getId());
+        List<Review> found = reviewService.findByCourseId(101L);
 
-        assertThat(found).isNotNull();
-        assertThat(found.getRating()).isEqualTo(4);
+        assertThat(found).isNotEmpty();
+        assertThat(found.get(0).getRating()).isEqualTo((byte) 4);
     }
 
     @Test
-    void testFindByBookingId_withNoReview_shouldReturnNull() {
-        Review found = reviewService.findByBookingId(testBooking.getId());
+    void testFindByCourseId_withNoReview_shouldReturnEmpty() {
+        List<Review> found = reviewService.findByCourseId(999L);
 
-        assertThat(found).isNull();
+        assertThat(found).isEmpty();
+    }
+
+    @Test
+    void testFindByUserId_withReview_shouldReturnReview() {
+        Review review = new Review();
+        review.setUserId(10L);
+        review.setCourseId(200L);
+        review.setRating((byte) 3);
+        review.setComment("Average");
+        reviewService.save(review);
+
+        List<Review> found = reviewService.findByUserId(10L);
+
+        assertThat(found).isNotEmpty();
+        assertThat(found.get(0).getComment()).isEqualTo("Average");
     }
 
     @Test
     void testSaveReview_withNullRating_shouldFail() {
         Review review = new Review();
-        review.setBookingId(testBooking.getId());
+        review.setUserId(1L);
+        review.setCourseId(101L);
         review.setRating(null);
 
         assertThatThrownBy(() -> reviewService.save(review)).isNotNull();
     }
 
     @Test
-    void testSaveReview_withoutBooking_shouldFail() {
+    void testSaveReview_withoutUserId_shouldFail() {
         Review review = new Review();
-        review.setRating(5);
+        review.setCourseId(101L);
+        review.setRating((byte) 5);
         review.setComment("Test");
 
         assertThatThrownBy(() -> reviewService.save(review)).isNotNull();

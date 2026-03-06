@@ -1,6 +1,6 @@
 package tw.rating.ratingproject.controller;
 
-import tools.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,60 +39,54 @@ class ChatMessageControllerTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-        
-        // 清理可能的舊資料
+
         bookingRepository.deleteAll();
-        
+
         testBooking = new Booking();
         testBooking.setOrderId(1L);
-        testBooking.setUserId(1L);
         testBooking.setCourseId(101L);
-        testBooking.setLessonCount(1);
         testBooking.setUnitPrice(100);
-        testBooking.setStatus(2);
+        testBooking.setLessonCount(1);
         testBooking = bookingRepository.save(testBooking);
     }
 
     /**
      * 確認 POST /api/chat-messages 回傳的 JSON 結構：
-     * - booking.id 存在且正確（巢狀結構）
-     * - 頂層不含獨立的 bookingId 欄位
-     * - senderId 和 content 正常存在於頂層
+     * - bookingId 存在且正確（對應 ChatMessage.bookingId）
+     * - role 和 message 正常存在於頂層
      */
     @Test
-    void testPostChatMessage_responseShouldHaveNestedBookingId() throws Exception {
+    void testPostChatMessage_responseShouldHaveCorrectFields() throws Exception {
         Map<String, Object> requestBody = Map.of(
                 "bookingId", testBooking.getId(),
-                "senderId", 1,
-                "content", "Hello tutor"
+                "role", 1,
+                "message", "Hello tutor"
         );
 
         mockMvc.perform(post("/api/chat-messages")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestBody)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.senderId").value(1))
-                .andExpect(jsonPath("$.content").value("Hello tutor"))
-                .andExpect(jsonPath("$.booking.id").value(testBooking.getId()))
-                .andExpect(jsonPath("$.bookingId").doesNotExist());
+                .andExpect(jsonPath("$.role").value(1))
+                .andExpect(jsonPath("$.message").value("Hello tutor"))
+                .andExpect(jsonPath("$.bookingId").value(testBooking.getId()));
     }
 
     @Test
-    void testPostChatMessage_verifyJsonStructureWithDifferentSender() throws Exception {
+    void testPostChatMessage_verifyJsonStructureWithDifferentRole() throws Exception {
         Map<String, Object> requestBody = Map.of(
                 "bookingId", testBooking.getId(),
-                "senderId", 101,
-                "content", "Confirming bookingId field is nested"
+                "role", 2,
+                "message", "Confirming role field is correct"
         );
 
         mockMvc.perform(post("/api/chat-messages")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestBody)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.senderId").value(101))
-                .andExpect(jsonPath("$.content").value("Confirming bookingId field is nested"))
-                .andExpect(jsonPath("$.booking").exists())
-                .andExpect(jsonPath("$.booking.id").isNumber())
-                .andExpect(jsonPath("$.bookingId").doesNotExist());
+                .andExpect(jsonPath("$.role").value(2))
+                .andExpect(jsonPath("$.message").value("Confirming role field is correct"))
+                .andExpect(jsonPath("$.bookingId").exists())
+                .andExpect(jsonPath("$.bookingId").isNumber());
     }
 }

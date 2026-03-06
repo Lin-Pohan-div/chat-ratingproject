@@ -197,8 +197,8 @@
     <main class="layout">
         <section class="card">
             <h1>Reviews / Ratings 驗證頁</h1>
-            <p>此頁僅保留 Review API 驗證，風格與 `chat-message-test.html` 一致。</p>
-            <p class="muted">預設 base URL 為 <code>/api</code>，可改成其他主機位址。</p>
+            <p>此頁僅保留 Review API 驗證，風格與 <code>ChatMessageTester.html</code> 一致。</p>
+            <p class="muted">預設 base URL 為 <code>/api</code>，可改成其他主機位址。Review 欄位：userId、courseId、rating（1-5）、comment。</p>
             <div class="grid">
                 <div class="field">
                     <label for="baseUrl">API Base URL</label>
@@ -211,27 +211,27 @@
             <h2>Reviews / Ratings</h2>
             <div class="grid">
                 <div class="field col-6">
-                    <label for="review-id">Review ID</label>
+                    <label for="review-id">Review ID（GET by ID / PUT / DELETE 用）</label>
                     <input type="number" id="review-id" min="1" value="1" />
                 </div>
                 <div class="field col-6">
-                    <label for="review-student-id">Student ID</label>
-                    <input type="number" id="review-student-id" min="1" value="1" />
+                    <label for="review-user-id">userId（GET by User 用）</label>
+                    <input type="number" id="review-user-id" min="1" value="1" />
                 </div>
                 <div class="field col-6">
-                    <label for="review-tutorcourse-id">Tutor Course ID</label>
-                    <input type="number" id="review-tutorcourse-id" min="1" value="1" />
+                    <label for="review-course-id">courseId（GET by Course / GET Avg Rating 用）</label>
+                    <input type="number" id="review-course-id" min="1" value="1" />
                 </div>
                 <div class="field col-6">
                     <label for="review-delete-id">Delete Review ID</label>
                     <input type="number" id="review-delete-id" min="1" value="1" />
                 </div>
                 <div class="field">
-                    <label for="review-body">Create Review JSON</label>
-                    <textarea id="review-body">{ "bookingId": 1, "rating": 5, "content": "Great!" }</textarea>
+                    <label for="review-body">Create Review JSON（欄位：userId、courseId、rating、comment）</label>
+                    <textarea id="review-body">{ "userId": 1, "courseId": 1, "rating": 5, "comment": "Great!" }</textarea>
                 </div>
                 <div class="field">
-                    <label for="review-update-body">Update Review JSON</label>
+                    <label for="review-update-body">Update Review JSON（欄位：rating、comment）</label>
                     <textarea id="review-update-body">{ "rating": 4, "comment": "Updated comment" }</textarea>
                 </div>
             </div>
@@ -239,8 +239,8 @@
             <div class="actions">
                 <button class="btn-primary" onclick="fetchAllReviews()">GET /api/reviews</button>
                 <button class="btn-primary" onclick="fetchReviewById()">GET by ID</button>
-                <button class="btn-secondary" onclick="fetchByStudent()">GET by Student</button>
-                <button class="btn-secondary" onclick="fetchByTutorCourse()">GET by TutorCourse</button>
+                <button class="btn-secondary" onclick="fetchByUser()">GET by User</button>
+                <button class="btn-secondary" onclick="fetchByCourse()">GET by Course</button>
                 <button class="btn-secondary" onclick="fetchAverageRating()">GET Avg Rating</button>
                 <button class="btn-primary" onclick="createReview()">POST</button>
                 <button class="btn-warn" onclick="updateReview()">PUT</button>
@@ -300,19 +300,19 @@
             runRequest(reviewsUrl(id), null, "查詢 Review by ID 成功");
         }
 
-        function fetchByStudent() {
-            const studentId = document.getElementById("review-student-id").value;
-            runRequest(reviewsUrl("student/" + studentId), null, "查詢 Student Reviews 成功");
+        function fetchByUser() {
+            const userId = document.getElementById("review-user-id").value;
+            runRequest(reviewsUrl("user/" + userId), null, "查詢 User Reviews 成功");
         }
 
-        function fetchByTutorCourse() {
-            const tutorCourseId = document.getElementById("review-tutorcourse-id").value;
-            runRequest(reviewsUrl("tutor-course/" + tutorCourseId), null, "查詢 TutorCourse Reviews 成功");
+        function fetchByCourse() {
+            const courseId = document.getElementById("review-course-id").value;
+            runRequest(reviewsUrl("course/" + courseId), null, "查詢 Course Reviews 成功");
         }
 
         function fetchAverageRating() {
-            const tutorCourseId = document.getElementById("review-tutorcourse-id").value;
-            runRequest(reviewsUrl("tutor-course/" + tutorCourseId + "/average-rating"), null, "查詢平均評分成功");
+            const courseId = document.getElementById("review-course-id").value;
+            runRequest(reviewsUrl("course/" + courseId + "/average-rating"), null, "查詢平均評分成功");
         }
 
         function createReview() {

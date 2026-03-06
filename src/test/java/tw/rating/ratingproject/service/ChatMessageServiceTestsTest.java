@@ -40,189 +40,111 @@ class ChatMessageServiceTestsTest {
     void setUp() {
         testBooking = new Booking();
         testBooking.setOrderId(1L);
-        testBooking.setUserId(1L);
         testBooking.setCourseId(101L);
-        testBooking.setLessonCount(1);
         testBooking.setUnitPrice(100);
-        testBooking.setStatus(2);
+        testBooking.setLessonCount(1);
         testBooking = bookingRepository.save(testBooking);
     }
 
     @Test
     void testSaveMessage_withValidData_shouldPersist() {
-        ChatMessage msg = new ChatMessage();
-        msg.setBooking(testBooking);
-        msg.setSenderId(101);
-        msg.setContent("Hello tutor");
-
-        ChatMessage saved = chatMessageService.save(msg);
+        ChatMessage saved = chatMessageService.save(testBooking.getId(), (byte) 1, "Hello tutor");
 
         assertThat(saved).isNotNull();
         assertThat(saved.getId()).isNotNull();
-        assertThat(saved.getContent()).isEqualTo("Hello tutor");
+        assertThat(saved.getMessage()).isEqualTo("Hello tutor");
     }
 
     @Test
     void testFindByBookingId_withMultipleMessages_shouldReturnAll() {
-        ChatMessage msg1 = new ChatMessage();
-        msg1.setBooking(testBooking);
-        msg1.setSenderId(1);
-        msg1.setContent("Message 1");
-        chatMessageService.save(msg1);
+        chatMessageService.save(testBooking.getId(), (byte) 1, "Message 1");
+        chatMessageService.save(testBooking.getId(), (byte) 2, "Message 2");
 
-        ChatMessage msg2 = new ChatMessage();
-        msg2.setBooking(testBooking);
-        msg2.setSenderId(101);
-        msg2.setContent("Message 2");
-        chatMessageService.save(msg2);
-
-        List<ChatMessage> messages = chatMessageService.findByBookingId(testBooking.getId().intValue());
+        List<ChatMessage> messages = chatMessageService.findByBookingId(testBooking.getId());
 
         assertThat(messages).hasSize(2);
-        assertThat(messages).extracting("content").contains("Message 1", "Message 2");
+        assertThat(messages).extracting("message").contains("Message 1", "Message 2");
     }
 
     @Test
     void testFindByBookingId_withNoMessages_shouldReturnEmptyList() {
-        List<ChatMessage> messages = chatMessageService.findByBookingId(testBooking.getId().intValue());
+        List<ChatMessage> messages = chatMessageService.findByBookingId(testBooking.getId());
 
         assertThat(messages).isEmpty();
     }
 
     @Test
     void testFindByBookingId_withInvalidBookingId_shouldReturnEmptyList() {
-        List<ChatMessage> messages = chatMessageService.findByBookingId(9999);
+        List<ChatMessage> messages = chatMessageService.findByBookingId(9999L);
 
         assertThat(messages).isEmpty();
     }
 
     @Test
-    void testSaveMessage_withNullContent_shouldFail() {
-        ChatMessage msg = new ChatMessage();
-        msg.setBooking(testBooking);
-        msg.setSenderId(101);
-        msg.setContent(null);
-
-        assertThatThrownBy(() -> chatMessageService.save(msg))
+    void testSaveMessage_withNullMessage_shouldFail() {
+        assertThatThrownBy(() -> chatMessageService.save(testBooking.getId(), (byte) 1, null))
                 .isNotNull();
     }
 
     @Test
-    void testSaveMessage_withoutBooking_shouldFail() {
-        ChatMessage msg = new ChatMessage();
-        msg.setSenderId(101);
-        msg.setContent("Test");
-
-        assertThatThrownBy(() -> chatMessageService.save(msg))
+    void testSaveMessage_withNullBookingId_shouldFail() {
+        assertThatThrownBy(() -> chatMessageService.save(null, (byte) 1, "Test"))
                 .isNotNull();
     }
 
     @Test
-    void testSaveMessage_withEmptyContent_shouldPersist() {
-        ChatMessage msg = new ChatMessage();
-        msg.setBooking(testBooking);
-        msg.setSenderId(1);
-        msg.setContent("");
-
-        ChatMessage saved = chatMessageService.save(msg);
+    void testSaveMessage_withLongMessage_shouldPersist() {
+        String longMessage = "A".repeat(1000);
+        ChatMessage saved = chatMessageService.save(testBooking.getId(), (byte) 1, longMessage);
 
         assertThat(saved).isNotNull();
-        assertThat(saved.getContent()).isEqualTo("");
-    }
-
-    @Test
-    void testSaveMessage_withLongContent_shouldPersist() {
-        String longContent = "A".repeat(1000);
-        ChatMessage msg = new ChatMessage();
-        msg.setBooking(testBooking);
-        msg.setSenderId(1);
-        msg.setContent(longContent);
-
-        ChatMessage saved = chatMessageService.save(msg);
-
-        assertThat(saved).isNotNull();
-        assertThat(saved.getContent()).hasSize(1000);
+        assertThat(saved.getMessage()).hasSize(1000);
     }
 
     @Test
     void testFindByBookingId_withMessagesInOrder_shouldReturnChronologically() {
-        ChatMessage msg1 = new ChatMessage();
-        msg1.setBooking(testBooking);
-        msg1.setSenderId(1);
-        msg1.setContent("First");
-        chatMessageService.save(msg1);
+        chatMessageService.save(testBooking.getId(), (byte) 1, "First");
+        chatMessageService.save(testBooking.getId(), (byte) 2, "Second");
 
-        ChatMessage msg2 = new ChatMessage();
-        msg2.setBooking(testBooking);
-        msg2.setSenderId(101);
-        msg2.setContent("Second");
-        chatMessageService.save(msg2);
-
-        List<ChatMessage> messages = chatMessageService.findByBookingId(testBooking.getId().intValue());
+        List<ChatMessage> messages = chatMessageService.findByBookingId(testBooking.getId());
 
         assertThat(messages).hasSize(2);
-        assertThat(messages.get(0).getContent()).isEqualTo("First");
-        assertThat(messages.get(1).getContent()).isEqualTo("Second");
+        assertThat(messages.get(0).getMessage()).isEqualTo("First");
+        assertThat(messages.get(1).getMessage()).isEqualTo("Second");
     }
 
     @Test
-    void testSaveMessage_withDifferentSenders_shouldPersist() {
-        ChatMessage msgFromStudent = new ChatMessage();
-        msgFromStudent.setBooking(testBooking);
-        msgFromStudent.setSenderId(1);
-        msgFromStudent.setContent("Student message");
+    void testSaveMessage_withDifferentRoles_shouldPersist() {
+        chatMessageService.save(testBooking.getId(), (byte) 1, "Student message");
+        chatMessageService.save(testBooking.getId(), (byte) 2, "Tutor message");
 
-        ChatMessage msgFromTutor = new ChatMessage();
-        msgFromTutor.setBooking(testBooking);
-        msgFromTutor.setSenderId(101);
-        msgFromTutor.setContent("Tutor message");
-
-        chatMessageService.save(msgFromStudent);
-        chatMessageService.save(msgFromTutor);
-
-        List<ChatMessage> messages = chatMessageService.findByBookingId(testBooking.getId().intValue());
+        List<ChatMessage> messages = chatMessageService.findByBookingId(testBooking.getId());
 
         assertThat(messages).hasSize(2);
-        assertThat(messages).extracting("senderId").contains(1, 101);
+        assertThat(messages).extracting("role").contains((byte) 1, (byte) 2);
     }
 
     @Test
     void testFindByBookingId_withMultipleBookings_shouldReturnOnlyRelevantMessages() {
         Booking anotherBooking = new Booking();
         anotherBooking.setOrderId(2L);
-        anotherBooking.setUserId(2L);
         anotherBooking.setCourseId(102L);
-        anotherBooking.setLessonCount(1);
         anotherBooking.setUnitPrice(100);
-        anotherBooking.setStatus(2);
+        anotherBooking.setLessonCount(1);
         anotherBooking = bookingRepository.save(anotherBooking);
 
-        ChatMessage msg1 = new ChatMessage();
-        msg1.setBooking(testBooking);
-        msg1.setSenderId(1);
-        msg1.setContent("Booking 1 message");
-        chatMessageService.save(msg1);
+        chatMessageService.save(testBooking.getId(), (byte) 1, "Booking 1 message");
+        chatMessageService.save(anotherBooking.getId(), (byte) 2, "Booking 2 message");
 
-        ChatMessage msg2 = new ChatMessage();
-        msg2.setBooking(anotherBooking);
-        msg2.setSenderId(2);
-        msg2.setContent("Booking 2 message");
-        chatMessageService.save(msg2);
-
-        List<ChatMessage> messages = chatMessageService.findByBookingId(testBooking.getId().intValue());
+        List<ChatMessage> messages = chatMessageService.findByBookingId(testBooking.getId());
 
         assertThat(messages).hasSize(1);
-        assertThat(messages.get(0).getContent()).isEqualTo("Booking 1 message");
+        assertThat(messages.get(0).getMessage()).isEqualTo("Booking 1 message");
     }
 
     @Test
     void testSaveMessage_bookingIdShouldNotBeNull() {
-        ChatMessage msg = new ChatMessage();
-        msg.setBooking(testBooking);
-        msg.setSenderId(1);
-        msg.setContent("Booking ID test");
-
-        ChatMessage saved = chatMessageService.save(msg);
+        ChatMessage saved = chatMessageService.save(testBooking.getId(), (byte) 1, "Booking ID test");
 
         // flush + clear 讓 JPA 一級快取失效，強制從 DB 重新載入
         entityManager.flush();
@@ -230,6 +152,6 @@ class ChatMessageServiceTestsTest {
         ChatMessage reloaded = chatMessageRepository.findById(saved.getId()).orElseThrow();
 
         assertThat(reloaded.getBookingId()).isNotNull();
-        assertThat(reloaded.getBookingId()).isEqualTo(testBooking.getId().intValue());
+        assertThat(reloaded.getBookingId()).isEqualTo(testBooking.getId());
     }
 }
